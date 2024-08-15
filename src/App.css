@@ -36,3 +36,568 @@
     transform: rotate(360deg);
   }
 }
+
+:root{
+  --color0: #222222;
+  --color1: #9A9A9A;
+  --color2: #B4B4B4;
+  --color3: #C2C2C2;
+  --color4: #DDDDDD;
+  --color5: #E4E4E4;
+}
+
+nav{
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--color2);
+  text-decoration: none;
+  border: var(--color0);
+}
+
+nav a {
+  color: var(--color0);
+  text-decoration: none;
+  margin: 10px;
+  font-size: 30px;
+  font-weight: 100;
+}
+
+button{
+  font-family:Verdana, Geneva, Tahoma, sans-serif;
+  font-weight: 500;
+  border: none;
+  background-color: var(--color1);
+  color: var(--color0);
+}
+
+nav button{
+  border: none;
+  border-radius: 5px;
+  background-color: var(--color1);
+  color: var(--color0);
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  font-size: 15px;
+}
+
+.itemImg {
+  width: 200px;
+}
+
+#itemDisplay{
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.infoField {
+  display: flex;
+  justify-content: space-around;
+  height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.image-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-container img {
+  max-height: 70vh;
+  min-height: 70vh;
+  width: auto;
+}
+
+.details-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.button-container button {
+  margin: 5px;
+}
+
+.input-container {
+  margin: 10px 0;
+}
+
+#title {
+  width: 100%;
+}
+
+#description {
+  width: 100%;
+  height: 200px;
+}
+
+#tags {
+  width: 100%;
+  height: 100px;
+}
+
+button[type="submit"] {
+  margin-top: 10px;
+  padding: 10px;
+}
+
+.favFitsContainer{
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.fitContainer{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 250px;
+  margin: auto;
+}
+
+.fitContainerWStar{
+  display: flex;
+  align-items: center;
+  justify-self: center;
+  flex-direction: column;
+}
+
+.favFitsContainer .fitContainer{
+  margin: 30px;
+  height: 300px;
+  width: 100px;
+}
+
+.fitImgContainer {
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.fitImgContainer img {
+  width: 100%;
+  display: block; /* Ensures the image does not create additional space */
+  height: auto; /* Maintains aspect ratio */
+}
+
+.favFitsContainer .fitImgContainer{
+  width: 100px;
+  height: auto;
+}
+
+.fitImg {
+  margin: auto; /* Centers the image within its container */
+}
+
+.hatPic{
+  margin-bottom: -80%;
+  transform: rotate(10deg);
+}
+.hatPic img{
+  transform: translate(15%, 0%);
+  width: 100%;
+  height: auto;
+}
+
+.jacketPic {
+  margin-bottom: -100%;
+  transform: rotate(-10deg);
+}
+.jacketPic img{
+  transform: translate(-25%, 0%);
+  width: 100%;
+  height: auto;
+}
+
+.topPic {
+  margin-bottom: -80%;
+  transform: rotate(10deg);
+  max-width: 100%;
+  height: auto;
+}
+.topPic img{
+  transform: translate(20%, 0%);
+  width: auto;
+  min-height: 100%;
+  max-height: 100%;
+  max-width: 100%;
+}
+
+.bottomPic{
+  margin-bottom: -80%;
+  transform: rotate(-8deg);
+}
+.bottomPic img{
+  transform: translate(-10%, 0%);
+  width: 150%;
+  height: auto;
+}
+
+.accessoryPic img{
+  margin-bottom: -90%;
+  max-width: 60%;
+  height: auto;
+}
+
+.shoePic{
+  transform: rotate(5deg);
+}
+.shoePic img{
+  max-width: 300px;
+  max-height: 300px;
+}
+
+.randFitContainer{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.randFitContainer button{
+  font-size: 15px;
+  padding: 5px;
+  margin: auto;
+  z-index: 0;
+  border-radius: 2px;
+}
+
+input{
+  font-family:Verdana, Geneva, Tahoma, sans-serif;
+  border: none;
+  background-color: var(--color4);
+  color: var(--color0);
+}
+
+.randFitContainer input{
+  font-size: 15px;
+  padding: 5px;
+  margin-left: 5px;
+  border-radius: 2px;
+}
+
+.swipeFitContainer{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 3vh;
+}
+
+.closetContainer{
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  height: 92vh;
+}
+
+.leftCloset{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 33%;
+  max-height: 100%;
+  overflow: scroll;
+}
+
+.midCloset{
+  display: flex;
+  justify-content: center;
+  align-items: first baseline;
+  width: 33%;
+  overflow: scroll;
+  max-height: 100%;
+}
+
+.rightCloset{
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  width: 33%;
+  max-height: 100%;
+  overflow: scroll;
+}
+
+.articleDisplay {
+  display: flex;
+  flex-wrap: wrap;
+  max-height: 375px;
+  min-height: 375px;
+  align-items: start;
+  width: 100%;
+  overflow: scroll;
+  background-color: var(--color4);
+  border-bottom: var(--color1) solid 2px;
+}
+
+.closetItemImg {
+  width: 70px;
+  height: 70px;
+  border: var(--color0) solid 2px;
+  border-radius: 5px;
+  object-fit: cover; /* Ensures the image fits within the dimensions without stretching */
+}
+
+.itemContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 70px; /* Matches the image width */
+  height: 70px; /* Matches the image height */
+  margin: 5px; /* Adds some space around each item */
+}
+
+.favStar{
+  font-size: 50px;
+  z-index: 0;
+}
+
+/* Hide scrollbar for all browsers */
+.scroll-container {
+  overflow-y: scroll; /* Allows scrolling */
+  -ms-overflow-style: none;  /* Hides scrollbar in Internet Explorer and Edge */
+  scrollbar-width: none;  /* Hides scrollbar in Firefox */
+}
+
+/* Hide scrollbar for WebKit-based browsers (Chrome, Safari) */
+.scroll-container::-webkit-scrollbar {
+  display: none;  /* Hides scrollbar in Chrome, Safari, and other WebKit-based browsers */
+}
+
+.itemContainer {
+  position: relative; /* This makes the container a reference for the absolute position of the lock icon */
+  display: inline-block;
+}
+
+.lockIcon {
+  position: absolute;
+  top: 10px; /* Adjust as needed */
+  right: 10px; /* Adjust as needed */
+  border-radius: 50%; /* Optional: Make it circular */
+  padding: 5px; /* Optional: Add some padding */
+  z-index: 1; /* Ensure it's above other elements */
+}
+
+.loading-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(238, 238, 238, 0.75);
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  text-align: center;
+}
+
+.loading-bar {
+  width: 100%;
+  background: var(--color3);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.loading-bar-progress {
+  height: 10px;
+  background: var(--color2);
+  transition: width 0.3s;
+}
+
+.fitTagInput{
+  margin-top: 10px;
+}
+
+.custom-file-input {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  padding-right: 10px;
+}
+
+.custom-file-input input[type="file"] {
+  display: none;
+}
+
+.upload-icon {
+  vertical-align: middle;
+  font-size: 20px;
+  background-color: none;
+  color: var(--color0);
+  padding: 5px 10px;
+}
+
+
+.custom-file-input:hover {
+  background-color: var(--color4);
+}
+
+.custom-text {
+  font-family:Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 14px;
+  color: #555;
+}
+
+.uploadUi{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px;
+}
+
+.uploadButton{
+  border-radius: 2px;
+  padding: 5px 10px;
+  margin: 5px;
+}
+
+.uploadButton:hover{
+  background-color: var(--color1);
+}
+
+.typeTitle{
+  font-size: 50px;
+  font-weight: 400;
+  margin: 20px;
+}
+
+.typeContainer{
+  border-bottom: var(--color0) solid 2px;
+}
+
+.topRow{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.topRow a{
+  color: var(--color0);
+  text-decoration: none;
+  margin: 20px;
+  font-size: 20px;
+  font-weight: 100;
+}
+
+.removeItemX{
+  float: right;
+  color: black;
+}
+
+.removeItemX:hover{
+  color: red;
+}
+
+.profileItem img{
+  height: 80px;
+  width: auto;
+  overflow: hidden;
+}
+
+.profileItemDisplay{
+  height: 50vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  border: solid 2px var(--color0);
+  background-color: var(--color5);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.closetShow{
+  margin: auto;
+  width: 50%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.closetShow button{
+  font-size: 30px;
+  padding: 10px;
+}
+
+.closetShow button:hover{
+  background-color: var(--color2);
+}
+
+
+
+.typeDisplay{
+  display: flex;
+  justify-content: center;
+  border-bottom: solid 2px var(--color1);
+}
+
+.profileTypeContainer {
+  width: 100%;
+}
+
+.profileTypeTitle{
+  display: flex;
+  justify-content: center;
+}
+
+.searchPage{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.profileResults{
+  display: flex;
+  justify-content: center;
+}
+
+.searchBar{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  margin-top: 10px;
+  width: 40%;
+}
+
+.searchBar input {
+  width: 60%;
+  height: 100%;
+  font-size: 20px;
+  margin-right: 10px;
+  padding: 5px;
+}
+
+.searchBar button {
+  width: auto;
+  height: 100%;
+  font-size: 20px;
+  padding: 5px;
+}
+
+.result{
+  background-color: var(--color2);
+  width: 50vw;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.result:hover{
+  background-color: var(--color1);
+}
