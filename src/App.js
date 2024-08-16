@@ -27,25 +27,27 @@ function App() {
     <>
       <Router>
       <nav>
-        {isAuth && <Link to="/onlineclosetbeta" onClick={() => {localStorage.removeItem("closetID")}}>Closet</Link>}
-        {isAuth && <Link to="/onlineclosetbeta/fits">Outfits</Link>}
-        {isAuth && <Link to="/onlineclosetbeta/tagitems">Tag Items</Link>}
-        <Link to="/onlineclosetbeta/search">Search</Link>
-        {!isAuth ? <Link to="/onlineclosetbeta/login">Login</Link> : 
+        {isAuth && <Link to="/" onClick={() => {localStorage.removeItem("closetID")}}>Closet</Link>}
+        {isAuth && <Link to="/fits">Outfits</Link>}
+        {isAuth && <Link to="/tagitems">Tag Items</Link>}
+        <Link to="/search">Search</Link>
+        {!isAuth ? <Link to="/login">Login</Link> : 
         <>
           <button className="signOutBtn" onClick={signUserOut}>Log Out</button>
         </>
         }
       </nav>
-        <Routes>
-          <Route path="/onlineclosetbeta/tagitems" element={<TagItems isAuth={ isAuth }/>}></Route>
-          <Route path="/onlineclosetbeta/login" element={<Login setIsAuth={ setIsAuth }/>}></Route>
-          <Route path="/onlineclosetbeta/swipe" element={<SwipeFits/>}></Route>
-          <Route path="/onlineclosetbeta/fits" element={<FavFits isAuth={ isAuth }/>}></Route>
-          <Route path="/onlineclosetbeta/search" element={<Search isAuth={isAuth}/>}></Route>
-          <Route path="/onlineclosetbeta/profile" element={<Profile />}></Route>
-          <Route path="/onlineclosetbeta" element={<Closet isAuth={isAuth}/>}></Route>
-        </Routes>
+        <Router basename="/onlineclosetbeta">
+          <Routes>
+            <Route path="/tagitems" element={<TagItems isAuth={isAuth} />} />
+            <Route path="/login" element={<Login setIsAuth={setIsAuth} />} />
+            <Route path="/swipe" element={<SwipeFits />} />
+            <Route path="/fits" element={<FavFits isAuth={isAuth} />} />
+            <Route path="/search" element={<Search isAuth={isAuth} />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/" element={<Closet isAuth={isAuth} />} />
+          </Routes>
+        </Router>
       </Router>
     </>
   );

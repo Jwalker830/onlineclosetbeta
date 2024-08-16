@@ -44,7 +44,7 @@ function Search() {
 
     const loadProfile = (selected) => {
         localStorage.setItem("profile", JSON.stringify(selected));
-        navigate("/onlineclosetbeta/profile");
+        navigate("/profile");
     }
 
     return (

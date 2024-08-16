@@ -49,7 +49,7 @@ const DisplayFit = ({ curFit, removeFit, width, curUser }) => {
 
     const viewFit = () => {
         localStorage.setItem("curFit", JSON.stringify(curFit));
-        navigate("/onlineclosetbeta");
+        navigate("/");
     }
 
     const compFits = (fit1, fit2) => {
