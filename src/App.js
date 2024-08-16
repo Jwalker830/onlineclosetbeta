@@ -1,13 +1,12 @@
-import logo from './logo.svg';
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { auth, db } from "./firebase-config.js";
-import TagItems from "./pages/TagItems.js"
-import Login from "./pages/Login.js"
-import SwipeFits from "./pages/SwipeFits.js"
-import Closet from "./pages/Closet.js"
+import { auth } from "./firebase-config.js";
+import TagItems from "./pages/TagItems.js";
+import Login from "./pages/Login.js";
+import SwipeFits from "./pages/SwipeFits.js";
+import Closet from "./pages/Closet.js";
 import FavFits from './pages/FavFits.js';
 import Search from './pages/Search.js';
 import Profile from './pages/Profile.js';
@@ -17,15 +16,14 @@ function App() {
 
   const signUserOut = () => {
     signOut(auth).then(() => {
-      localStorage.clear()
-      setIsAuth(false)
-      window.location.pathname = "/login";
-    })
+      localStorage.clear();
+      setIsAuth(false);
+      window.location.pathname = "/onlineclosetbeta/login";
+    });
   }
 
   return (
-    <>
-      <Router>
+    <Router basename="/onlineclosetbeta">
       <nav>
         {isAuth && <Link to="/" onClick={() => {localStorage.removeItem("closetID")}}>Closet</Link>}
         {isAuth && <Link to="/fits">Outfits</Link>}
@@ -37,19 +35,16 @@ function App() {
         </>
         }
       </nav>
-        <Router basename="/onlineclosetbeta">
-          <Routes>
-            <Route path="/tagitems" element={<TagItems isAuth={isAuth} />} />
-            <Route path="/login" element={<Login setIsAuth={setIsAuth} />} />
-            <Route path="/swipe" element={<SwipeFits />} />
-            <Route path="/fits" element={<FavFits isAuth={isAuth} />} />
-            <Route path="/search" element={<Search isAuth={isAuth} />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/" element={<Closet isAuth={isAuth} />} />
-          </Routes>
-        </Router>
-      </Router>
-    </>
+      <Routes>
+        <Route path="/tagitems" element={<TagItems isAuth={isAuth} />} />
+        <Route path="/login" element={<Login setIsAuth={setIsAuth} />} />
+        <Route path="/swipe" element={<SwipeFits />} />
+        <Route path="/fits" element={<FavFits isAuth={isAuth} />} />
+        <Route path="/search" element={<Search isAuth={isAuth} />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/" element={<Closet isAuth={isAuth} />} />
+      </Routes>
+    </Router>
   );
 }
 
