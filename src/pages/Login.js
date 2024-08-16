@@ -13,7 +13,7 @@ function Login({ setIsAuth }){
             localStorage.setItem("isAuth", true);
             setIsAuth(true);
             addUser();
-            navigate("/");
+            navigate("/onlineclosetbeta");
         })
     }
 

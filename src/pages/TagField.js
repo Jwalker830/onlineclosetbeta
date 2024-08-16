@@ -235,7 +235,7 @@ const TagField = ({ item, setCurItem, index, itemArray, setCurIndex }) => {
 
       const styleGarment = () => {
         localStorage.setItem("item", JSON.stringify(item));
-        navigate("/");
+        navigate("/onlineclosetbeta");
       }
       
 
