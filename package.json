@@ -2,7 +2,7 @@
   "name": "closet",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://github.com/Jwalker830/onlineclosetbeta",
+  "homepage": "https://jwalker830.github.io/onlineclosetbeta",
   "dependencies": {
     "@tensorflow-models/body-pix": "^2.2.1",
     "@tensorflow/tfjs": "^4.20.0",
