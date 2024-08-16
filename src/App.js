@@ -44,7 +44,7 @@ function App() {
           <Route path="/onlineclosetbeta/fits" element={<FavFits isAuth={ isAuth }/>}></Route>
           <Route path="/onlineclosetbeta/search" element={<Search isAuth={isAuth}/>}></Route>
           <Route path="/onlineclosetbeta/profile" element={<Profile />}></Route>
-          <Route path="/onlineclosetbeta/" element={<Closet isAuth={isAuth}/>}></Route>
+          <Route path="/onlineclosetbeta" element={<Closet isAuth={isAuth}/>}></Route>
         </Routes>
       </Router>
     </>
