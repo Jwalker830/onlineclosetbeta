@@ -2,6 +2,7 @@
   "name": "closet",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://github.com/Jwalker830/onlineclosetbeta",
   "dependencies": {
     "@tensorflow-models/body-pix": "^2.2.1",
     "@tensorflow/tfjs": "^4.20.0",
@@ -12,6 +13,7 @@
     "color-namer": "^1.4.0",
     "fast-levenshtein": "^3.0.0",
     "firebase": "^10.12.3",
+    "gh-pages": "^6.1.1",
     "icons": "^1.0.0",
     "pica": "^9.0.1",
     "react": "^18.3.1",
@@ -28,7 +30,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
