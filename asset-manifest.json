@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/Jwalker830/onlineclosetbeta/static/css/main.f312a2e3.css",
+    "main.js": "/Jwalker830/onlineclosetbeta/static/js/main.d5735606.js",
+    "static/js/453.61902660.chunk.js": "/Jwalker830/onlineclosetbeta/static/js/453.61902660.chunk.js",
+    "static/media/logo.svg": "/Jwalker830/onlineclosetbeta/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "index.html": "/Jwalker830/onlineclosetbeta/index.html",
+    "main.f312a2e3.css.map": "/Jwalker830/onlineclosetbeta/static/css/main.f312a2e3.css.map",
+    "main.d5735606.js.map": "/Jwalker830/onlineclosetbeta/static/js/main.d5735606.js.map",
+    "453.61902660.chunk.js.map": "/Jwalker830/onlineclosetbeta/static/js/453.61902660.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f312a2e3.css",
+    "static/js/main.d5735606.js"
+  ]
+}
