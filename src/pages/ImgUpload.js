@@ -65,7 +65,7 @@ const ImgUpload = ({ addItemList }) => {
   
       try {
         // Send the image file to the Python server for background removal
-        const response = await axios.post('http://localhost:5000/remove_background', formData, {
+        const response = await axios.post('https://removebg-gd4j.onrender', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           },

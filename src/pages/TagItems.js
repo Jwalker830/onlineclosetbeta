@@ -12,6 +12,7 @@ const TagItems = ({ isAuth }) => {
     const [curIndex, setCurIndex] = useState();
     const [curItem, setCurItem] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [onMobile, setOnMobile] = useState(() => {return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream});
 
     const sortItems = (items) => {
         let sorted = [
@@ -78,10 +79,10 @@ const TagItems = ({ isAuth }) => {
                         <ImgUpload addItemList={addToItemList} />
                         <Link to="/swipe">Score random outfits</Link>
                     </div>
-                    <ItemDisplay items={displayedItems} setCurItem={updateCurItem} removeItem={handleRemoveItem} />
+                    <ItemDisplay items={displayedItems} setCurItem={updateCurItem} removeItem={handleRemoveItem} isOnMobile={onMobile}/>
                 </>
             ) : (
-                <TagField item={curItem} setCurItem={updateCurItem} index={sortedItems.indexOf(curItem)} itemArray={sortedItems} setCurIndex={updateCurIndex} />
+                <TagField item={curItem} setCurItem={updateCurItem} index={sortedItems.indexOf(curItem)} itemArray={sortedItems} setCurIndex={updateCurIndex} isOnMobile={onMobile}/>
             )}
         </div>
     );

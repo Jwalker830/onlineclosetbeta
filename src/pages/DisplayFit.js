@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 const DisplayFit = ({ curFit, removeFit, width, curUser }) => {
     const [isFav, setIsFav] = useState(false);
     const [isCurUser, setIsCurUser] = useState(curUser);
+    const [onMobile, setOnMobile] = useState(() => {return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream});
 
     useEffect(() => {
         console.log(isCurUser);
@@ -114,10 +115,10 @@ const DisplayFit = ({ curFit, removeFit, width, curUser }) => {
     }, [curFit]);
 
     return (
-            <div className='fitContainerWStar'>
+            <div className='fitContainerWStar' style={{flexDirection: onMobile ? "row" : "column"}}>
                 {curFit !== null ? (
                     <>
-                        <div className='fitContainer' style={{width: width}} onClick={viewFit}>
+                        <div className={`fitContainer ${onMobile && 'mobile'}`} onClick={viewFit}>
                             {curFit.hat && curFit.hat.id !== "001" && (
                                 <div className='hatPic fitImgContainer'>
                                     <img key={curFit.hat.id} src={curFit.hat.imgURL} alt="hat" className='fitImg' style={{ zIndex: '2' }} />
@@ -166,7 +167,7 @@ const DisplayFit = ({ curFit, removeFit, width, curUser }) => {
                                 </div>
                             )}
                         </div>
-                        <div className='favStar' onClick={setFav}>
+                        <div className='favStar' onClick={setFav} style={{paddingLeft: onMobile ? "20px" : "0px"}}>
                             {isCurUser &&
                                 <>
                                     {(isFav ? "★" : "☆")}

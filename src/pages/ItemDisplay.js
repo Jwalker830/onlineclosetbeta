@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { arrayUnion, arrayRemove, updateDoc, doc, query, collection, where, getDocs, deleteDoc } from "firebase/firestore";
 import { db, auth, provider} from "../firebase-config";
 
-const ItemDisplay = ({ isAuth, items, setCurItem, removeItem }) => {
+const ItemDisplay = ({ isAuth, items, setCurItem, removeItem, isOnMobile }) => {
     const [sortedItems, setSortedItems] = useState({
         hats: [],
         jackets: [],
@@ -84,6 +84,8 @@ const ItemDisplay = ({ isAuth, items, setCurItem, removeItem }) => {
                         onMouseEnter={() => handleMouseEnter(item.id)}
                         onMouseLeave={handleMouseLeave}
                         style={{
+                            height: isOnMobile ? "120px" : "250px",
+                            width: "auto",
                             backgroundColor: hoveredItemId === item.id ? 'rgba(88, 88, 88, 0.5)' : 'transparent',
                             padding: '10px',
                             transition: 'background-color 0.3s ease',
@@ -95,6 +97,10 @@ const ItemDisplay = ({ isAuth, items, setCurItem, removeItem }) => {
                             alt="Processed" 
                             className="itemImg" 
                             onClick={() => setCurItem(item)} 
+                            style={{
+                                height: isOnMobile ? "120px" : "250px",
+                                width: "auto"
+                            }}
                         />
                     </div>
                 ))}

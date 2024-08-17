@@ -6,7 +6,7 @@ import { MdOutlineFileUpload   } from 'react-icons/md';
 import { db, auth } from '../firebase-config';
 import { useNavigate } from "react-router-dom";
 
-const TagField = ({ item, setCurItem, index, itemArray, setCurIndex }) => {
+const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile }) => {
     const [itemTitle, setItemTitle] = useState("");
     const [itemDesc, setItemDesc] = useState("");
     const [itemTags, setItemTags] = useState("");
@@ -137,7 +137,7 @@ const TagField = ({ item, setCurItem, index, itemArray, setCurIndex }) => {
                 formData.append('file', base64Encoded); // Ensure 'file' matches the key expected by Flask
                 try {
                     // Send Base64 encoded image data to Python server for background removal
-                    const response = await axios.post('http://localhost:5000/remove_background', formData, {
+                    const response = await axios.post('https://removebg-gd4j.onrender', formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data'
                         }
@@ -241,7 +241,9 @@ const TagField = ({ item, setCurItem, index, itemArray, setCurIndex }) => {
 
     return (
         itemDisplay !== null && (
-            <div className='infoField'>
+            <div className='infoField' style={{
+                flexDirection: isOnMobile ? "column" : "row"
+            }}>
                 <div className="image-container">
                     <img key={itemDisplay.id} src={itemImage} alt="Processed" onClick={styleGarment}/>
                     <div className='uploadUi'>

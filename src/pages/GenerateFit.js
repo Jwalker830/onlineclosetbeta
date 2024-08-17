@@ -322,7 +322,7 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
                 <>
                     <GetPrefItems setPrefItems={updatePrefItems} items={displayedItems} prefs={userPrefs}/>
                     {curFit !== null &&
-                        <div>
+                        <div className='generatorContainer'>
                             <div className='fitTagInput'>
                                 <button onClick={randomizeFit} className='newFitButton'>New Outfit</button>
                                 <input placeholder='tag...' onChange={(e) => updatePrompt(e.target.value)}></input>

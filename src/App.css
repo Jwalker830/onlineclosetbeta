@@ -165,20 +165,32 @@ button[type="submit"] {
   flex-direction: column;
   align-items: center;
   width: 250px;
-  margin: auto;
+}
+
+.mobile{
+  width: 90px;
 }
 
 .fitContainerWStar{
   display: flex;
   align-items: center;
-  justify-self: center;
-  flex-direction: column;
+  justify-content: center;
 }
 
 .favFitsContainer .fitContainer{
   margin: 30px;
   height: 300px;
   width: 100px;
+}
+
+.favFitsContainer .mobile{
+  height: 300px;
+  width: 66px;
+}
+
+.generatorContainer{
+  display: flex;
+  flex-direction: column;
 }
 
 .fitImgContainer {
