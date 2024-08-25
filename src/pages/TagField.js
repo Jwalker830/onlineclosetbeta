@@ -137,7 +137,7 @@ const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile 
                 formData.append('file', base64Encoded); // Ensure 'file' matches the key expected by Flask
                 try {
                     // Send Base64 encoded image data to Python server for background removal
-                    const response = await axios.post('https://removebg-gd4j.onrender', formData, {
+                    const response = await axios.post('web-production-933d3.up.railway.app', formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data'
                         }
