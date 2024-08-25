@@ -78,6 +78,12 @@ function Closet({ isAuth }) {
     }, [navigate]);
 
     useEffect(() => {
+        if (!localStorage.getItem("isAuth") && localStorage.getItem("closetID")) {
+            navigate("/login");
+        }        
+    }, []);
+
+    useEffect(() => {
         if (userItems && userItems.length > 0) {
             const sorted = sortUserItems();
             setSortedItems(sorted);
