@@ -10,6 +10,7 @@ import DisplayFit from "./DisplayFit";
 
 function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, id }) {
     const tcom = require('thesaurus-com');
+    const [isCurUser, setIsCurUser] = useState()
     const [prefItems, setPrefItems] = useState({
         love: [],
         like: [],
@@ -54,6 +55,15 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
         setGenPrompt(itemsArray);
         return
     }
+
+    useEffect(() => {
+        if(auth.currentUser){
+            setIsCurUser(id === auth.currentUser.uid);
+        }
+        else {
+            setIsCurUser(false);
+        }
+    }, [id])
 
     const updateItemList = (newItemList) => {
         setDisplayedItems(newItemList);
@@ -327,7 +337,7 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
                                 <button onClick={randomizeFit} className='newFitButton'>New Outfit</button>
                                 <input placeholder='tag...' onChange={(e) => updatePrompt(e.target.value)}></input>
                             </div>
-                            <DisplayFit curFit={curFit} removeFit={removeFit} curUser={id === auth.currentUser.uid}/>
+                            <DisplayFit curFit={curFit} removeFit={removeFit} curUser={isCurUser}/>
                         </div>
                     }
                 </>

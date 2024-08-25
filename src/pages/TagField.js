@@ -242,7 +242,8 @@ const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile 
     return (
         itemDisplay !== null && (
             <div className='infoField' style={{
-                flexDirection: isOnMobile ? "column" : "row"
+                flexDirection: isOnMobile ? "column" : "row",
+                justifyContent: isOnMobile ? "flex-start" : "space-around"
             }}>
                 <div className="image-container">
                     <img key={itemDisplay.id} src={itemImage} alt="Processed" onClick={styleGarment}/>

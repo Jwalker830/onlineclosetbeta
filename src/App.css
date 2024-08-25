@@ -95,7 +95,6 @@ nav button{
 
 .infoField {
   display: flex;
-  justify-content: space-around;
   height: 100vh;
   padding: 20px;
   box-sizing: border-box;
