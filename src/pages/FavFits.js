@@ -61,7 +61,7 @@ const FavFits = ({ isAuth }) => {
             {favFits.length > 0 ? (
                 <div className='favFitsContainer'>
                     {favFits.map((fit) => (
-                        <DisplayFit key={fit.id} curFit={fit} removeFit={handleRemoveFit}/>
+                        <DisplayFit key={fit.id} curFit={fit} removeFit={handleRemoveFit} curUser={true}/>
                     ))}
                 </div>
             ) : (

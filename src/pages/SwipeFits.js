@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import GetUserItems from './GetUserItems';
 import GetUserPrefs from './GetUserPrefs';
-import { updateDoc, arrayUnion, doc, setDoc, deleteDoc, arrayRemove } from 'firebase/firestore';
+import { updateDoc, doc } from 'firebase/firestore';
 import { db, auth } from "../firebase-config";
 import DisplayFit from './DisplayFit';
 
-const ItemDisplay = ({ isAuth }) => {
+const SwipeFits = ({ isAuth }) => {
     const [displayedItems, setDisplayedItems] = useState([]);
     const [curFit, setCurFit] = useState(null);
     const [sorted, setSorted] = useState({
@@ -18,13 +18,7 @@ const ItemDisplay = ({ isAuth }) => {
     });
     const [fitTags, setFitTags] = useState([]);
     const [combos, setCombos] = useState([]);
-    const [comboPrefs, setComboPrefs] = useState({
-        love: [],
-        like: [],
-        enjoy: [],
-        dislike: [],
-        hate: []
-    });
+    const [comboPrefs, setComboPrefs] = useState({});
     const [slideDirection, setSlideDirection] = useState(null);
 
     useEffect(() => {
@@ -97,10 +91,11 @@ const ItemDisplay = ({ isAuth }) => {
             dislike: [...comboPrefs.dislike, ...newCombosList.dislike],
             hate: [...comboPrefs.hate, ...newCombosList.hate],
         };
+
+        console.log(updatedComboPrefs);
     
         updateComboPrefs(updatedComboPrefs);
     };
-    
 
     const updateComboPrefs = async (updatedComboPrefs) => {
         setComboPrefs(updatedComboPrefs);
@@ -112,13 +107,10 @@ const ItemDisplay = ({ isAuth }) => {
             console.error("Error updating combo preferences:", error);
         }
     };
-    
-    
-    
 
     const scoreTags = (amt) => {
         const newCombos = combos.map(combo => [...combo]);
-    
+
         // Iterate through each attribute (property) of fitTags
         for(let i = 0; i < fitTags.length; i++){
             for(let j = i; j < fitTags.length; j++){
@@ -132,10 +124,10 @@ const ItemDisplay = ({ isAuth }) => {
                 }
             }
         }
-    
+
         // Update combos state with the newCombos array
         setCombos(newCombos);
-    
+
         // Call updateCombos to update comboPrefs
         updateCombos(newCombos);
         setTimeout(() => {
@@ -143,9 +135,6 @@ const ItemDisplay = ({ isAuth }) => {
             setSlideDirection(null);
         }, 300)
     };
-    
-    
-    
 
     useEffect(() => {
         let direction = "";
@@ -175,10 +164,54 @@ const ItemDisplay = ({ isAuth }) => {
             setSlideDirection(direction);
         };
         
+        const handleTouchStart = (event) => {
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
+        };
+
+        const handleTouchEnd = (event) => {
+            const touchEndX = event.changedTouches[0].clientX;
+            const touchEndY = event.changedTouches[0].clientY;
+
+            const diffX = touchEndX - touchStartX;
+            const diffY = touchEndY - touchStartY;
+
+            if(diffX === 0 || diffY === 0){
+                return
+            }
+
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                if (diffX > 0) {
+                    direction = "right";
+                    scoreTags(2);
+                } else {
+                    direction = "left";
+                    scoreTags(-2);
+                }
+            } else {
+                if (diffY > 0) {
+                    direction = "down";
+                    scoreTags(-1);
+                } else {
+                    direction = "up";
+                    scoreTags(1);
+                }
+            }
+
+            setSlideDirection(direction);
+        };
+
+        let touchStartX = 0;
+        let touchStartY = 0;
+
         document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('touchstart', handleTouchStart);
+        document.addEventListener('touchend', handleTouchEnd);
 
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('touchstart', handleTouchStart);
+            document.removeEventListener('touchend', handleTouchEnd);
         };
     }, [scoreTags]); // Ensure scoreTags is included as a dependency if it's defined in this scope
 
@@ -195,7 +228,7 @@ const ItemDisplay = ({ isAuth }) => {
             shoeList: [],
             accessoryList: [],
         };
-    
+
         items.forEach(item => {
             switch (item.type) {
                 case "Hat":
@@ -220,24 +253,24 @@ const ItemDisplay = ({ isAuth }) => {
                     break;
             }
         });
-    
+
         let comboSet = new Set();
-    
+
         // Convert existing combos to JSON strings and add to comboSet
         const addCombosToSet = (combos) => {
             combos.forEach(combo => {
                 comboSet.add(JSON.stringify(combo));
             });
         };
-    
+
         addCombosToSet(comboPrefs.love);
         addCombosToSet(comboPrefs.like);
         addCombosToSet(comboPrefs.enjoy);
         addCombosToSet(comboPrefs.dislike);
         addCombosToSet(comboPrefs.hate);
-    
+
         console.log(comboSet);
-    
+
         for(let i = 0; i < items.length; i++){
             for(let j = i; j < items.length; j++){
                 for(let a = 0; a < items[i].tags.length; a++){
@@ -253,7 +286,7 @@ const ItemDisplay = ({ isAuth }) => {
                 }
             }
         }
-    
+
         setCombos(
             Array.from(comboSet).map(combo => {
                 let parsedCombo = JSON.parse(combo);
@@ -267,7 +300,6 @@ const ItemDisplay = ({ isAuth }) => {
 
         return sortedItems;
     };
-    
 
     const pickOutfit = (sortedItems) => {
         const getRandomItems = (array, amt) => {
@@ -288,21 +320,23 @@ const ItemDisplay = ({ isAuth }) => {
             }
             return Array.from(returnItems);
         };
-
+    
         const outfit = {
             hat: getRandomItems(sortedItems.hatList, 1),
             jacket: getRandomItems(sortedItems.jacketList, 1),
             top: getRandomItems(sortedItems.topList, 1),
             bottom: getRandomItems(sortedItems.bottomList, 1),
             shoe: getRandomItems(sortedItems.shoeList, 1),
-            accessories: getRandomItems(sortedItems.accessoryList, Math.floor(Math.random() * 3)),
+            accessories: getRandomItems(sortedItems.accessoryList, Math.floor(Math.random() * 3)) || [] // Ensure it's an array
         };
-
+    
         let accessoryTags = new Set();
-
+    
+        console.log(outfit.accessories); // Debugging output
+    
         if (Array.isArray(outfit.accessories)) {
-            outfit.accessories.map(accessory => {
-                if (accessory.tags) {
+            outfit.accessories.forEach(accessory => {
+                if (accessory && accessory.tags) {
                     if (Array.isArray(accessory.tags)) {
                         accessory.tags.forEach(tag => {
                             accessoryTags.add(tag);
@@ -315,20 +349,31 @@ const ItemDisplay = ({ isAuth }) => {
                     }
                 }
             });
+        } else {
+            // Handle case where 'outfit.accessories' is not an array
+            console.warn("Expected 'outfit.accessories' to be an array but got:", typeof outfit.accessories);
+            if (outfit.accessories && typeof outfit.accessories === 'object' && outfit.accessories.tags) {
+                Object.keys(outfit.accessories.tags).forEach(tag => {
+                    accessoryTags.add(tag);
+                });
+            }
         }
-        else {
-            outfit.accessories.tags.forEach(tag => {
-                accessoryTags.add(tag);
-            });
-        }
-
-        let fitTagsList = [...(outfit.hat ? outfit.hat.tags : []), ...(outfit.jacket ? outfit.jacket.tags : []), ...(outfit.top ? outfit.top.tags : []), ...(outfit.bottom ? outfit.bottom.tags : []), ...(outfit.shoe ? outfit.shoe.tags : []), ...(outfit.accessory ? Array.from(accessoryTags) : [])]
-        
+    
+        let fitTagsList = [
+            ...(outfit.hat ? outfit.hat.tags : []), 
+            ...(outfit.jacket ? outfit.jacket.tags : []), 
+            ...(outfit.top ? outfit.top.tags : []), 
+            ...(outfit.bottom ? outfit.bottom.tags : []), 
+            ...(outfit.shoe ? outfit.shoe.tags : []), 
+            ...(Array.from(accessoryTags))
+        ];
+    
         setFitTags(fitTagsList);
         setCurFit(outfit);
-    };
+    };    
 
     const updateComboList = (newPrefsObj) => {
+        console.log(newPrefsObj);
         setComboPrefs(newPrefsObj);
     };
 
@@ -338,7 +383,7 @@ const ItemDisplay = ({ isAuth }) => {
 
     return (
         <div>
-            <GetUserItems setItemList={updateItemList} />
+            <GetUserItems setItemList={updateItemList} id={auth.currentUser.uid}/>
             <GetUserPrefs setPrefs={updateComboList}/>
             <div className='swipeFitContainer' style={{
                     transition: 'transform 0.3s ease-in-out',
@@ -349,10 +394,14 @@ const ItemDisplay = ({ isAuth }) => {
                         'translateY(100vh)'
                         ) : 'translate(0, 0)'
                 }}>
-                <DisplayFit curFit={curFit} removeFit={handleRemoveFit} width={"150px"}/>
+                {curFit &&
+                    <>
+                        <DisplayFit curFit={curFit} removeFit={handleRemoveFit} width={"150px"} curUser={true}/>
+                    </>
+                }
             </div>
         </div>
     );
 };
 
-export default ItemDisplay;
+export default SwipeFits;
