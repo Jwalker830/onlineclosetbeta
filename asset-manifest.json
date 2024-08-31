@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/onlineclosetbeta/static/css/main.df6d183e.css",
-    "main.js": "/onlineclosetbeta/static/js/main.c82e454f.js",
+    "main.js": "/onlineclosetbeta/static/js/main.0d54fddb.js",
     "static/js/453.61902660.chunk.js": "/onlineclosetbeta/static/js/453.61902660.chunk.js",
     "index.html": "/onlineclosetbeta/index.html",
     "main.df6d183e.css.map": "/onlineclosetbeta/static/css/main.df6d183e.css.map",
-    "main.c82e454f.js.map": "/onlineclosetbeta/static/js/main.c82e454f.js.map",
+    "main.0d54fddb.js.map": "/onlineclosetbeta/static/js/main.0d54fddb.js.map",
     "453.61902660.chunk.js.map": "/onlineclosetbeta/static/js/453.61902660.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.df6d183e.css",
-    "static/js/main.c82e454f.js"
+    "static/js/main.0d54fddb.js"
   ]
 }
