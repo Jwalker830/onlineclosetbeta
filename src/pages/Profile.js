@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"; // Added useEffect import
-import { collection, getDocs, query, where, startAt, endAt } from "firebase/firestore";
+import { collection, getDocs, query, where, startAt, endAt, updateDoc, doc, arrayUnion, arrayRemove } from "firebase/firestore";
 import GetUserItems from "./GetUserItems";
-import { db } from "../firebase-config";
+import { db, auth } from "../firebase-config";
 import { useNavigate } from "react-router-dom";
 
 function Profile() {
@@ -24,6 +24,9 @@ function Profile() {
         accessories: [],
         other: [],
     });
+    const [following, setFollowing] = useState();
+    const [follows, setFollows] = useState();
+    const [friends, setFriends] = useState();
 
     const updateItemList = (newItemList) => {
         setItems(newItemList);
@@ -37,10 +40,15 @@ function Profile() {
     }, [items]); // Trigger effect when items change
 
     useEffect(() => {
+        localStorage.removeItem("profile");
         getProfile();
     }, [profileID])
 
     const getProfile = async () => {
+        if(!profileID && localStorage.getItem("isAuth")){
+            setProfileID(auth.currentUser.uid);
+        }
+
         if (profileID) {
             console.log(profileID);
             try {
@@ -109,13 +117,103 @@ function Profile() {
         navigate("/");
     }
 
+    const followUser = async() => {
+        console.log("following");
+        await updateDoc(doc(db, "users", profileID), {
+            followers: arrayUnion(auth.currentUser.uid)
+        });
+        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+            following: arrayUnion(profileID)
+        });
+        setTimeout(() => {
+            isFollowing();
+        }, 100)
+    }
+
+    const unfollowUser = async() => {
+        console.log("unfollowing");
+        await updateDoc(doc(db, "users", profileID), {
+            followers: arrayRemove(auth.currentUser.uid)
+        });
+        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+            following: arrayRemove(profileID)
+        });
+        setTimeout(() => {
+            isFollowing();
+        }, 100)
+    }
+
+    
+    const isFollowing = async () => {
+        try {
+            let uFollow;
+            let iFollow;
+            const q = query(collection(db, "users"), where("id", "==", auth.currentUser.uid));
+            const querySnapshot = await getDocs(q);
+    
+            if (querySnapshot.empty) {
+                console.error("No user document found");
+                return;
+            }
+    
+            const userDoc = querySnapshot.docs[0];
+            const userData = userDoc.data();
+    
+            if (userData.following && userData.following.includes(profileID)) {
+                setFollowing(true);
+                iFollow = true;
+            } else {
+                setFollowing(false);
+                iFollow = false;
+            }
+
+            if (userData.followers && userData.followers.includes(profileID)) {
+                setFollows(true);
+                uFollow = true;
+            } else {
+                setFollows(false);
+                uFollow = true;
+            }
+            if(iFollow && uFollow){
+                setFriends(true);
+            }
+            else{
+                setFriends(false);
+            }
+        } catch (error) {
+            console.error("Error checking following status:", error);
+            setFollowing(false);
+            setFollows(false);
+        }
+
+    }
+
+    useEffect(() => {
+        if(localStorage.getItem("isAuth")){
+            isFollowing();
+        }
+    }, [])
+
     return (
         <div className="profileContainer">
         {profile &&
             <>
                 <GetUserItems setItemList={updateItemList} id={profileID}/>
-                <h1>{profile.name}</h1>
-                {items.length > 0 ? (
+                <div className="profileHeader">
+                    <h1>{profile.name}</h1>
+                </div>
+                <>{(follows && !friends) && <h3>Follows you</h3>}</>
+                <>{friends && <h3>Friends</h3>}</>
+                {auth.currentUser && auth.currentUser.uid !== profileID &&
+                    <>
+                        {following ?
+                            <button onClick={unfollowUser}>Unfollow</button>
+                            :
+                            <button onClick={followUser}>Follow</button>
+                        }
+                    </>
+                }
+                {items.length > 3 ? (
                     <div className="closetShow">
                         <div className="profileItemDisplay">
                             {renderItems(sortedItems.hats, 'Hats')}

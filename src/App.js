@@ -28,6 +28,7 @@ function App() {
         {isAuth && <Link to="/" onClick={() => {localStorage.removeItem("closetID")}}>Closet</Link>}
         {isAuth && <Link to="/fits">Outfits</Link>}
         {isAuth && <Link to="/tagitems">Tag Items</Link>}
+        {isAuth && <Link to="/profile">Profile</Link>}
         <Link to="/search">Search</Link>
         {!isAuth ? <Link to="/login">Login</Link> : 
         <>

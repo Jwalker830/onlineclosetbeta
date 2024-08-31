@@ -78,7 +78,7 @@ function Closet({ isAuth }) {
     }, [navigate]);
 
     useEffect(() => {
-        if (!localStorage.getItem("isAuth") && localStorage.getItem("closetID")) {
+        if (!localStorage.getItem("isAuth") && !localStorage.getItem("closetID")) {
             navigate("/login");
         }        
     }, []);

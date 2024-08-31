@@ -20,6 +20,7 @@ const SwipeFits = ({ isAuth }) => {
     const [combos, setCombos] = useState([]);
     const [comboPrefs, setComboPrefs] = useState({});
     const [slideDirection, setSlideDirection] = useState(null);
+    const [onMobile, setOnMobile] = useState(() => {return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream});
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -37,6 +38,22 @@ const SwipeFits = ({ isAuth }) => {
             pickOutfit(sortedItems);
         }
     }, [displayedItems]);
+
+    useEffect(() => {
+        if(onMobile){
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+        }
+        else{
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+        }
+
+        return () => {
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+        }
+    }, [onMobile])
 
     const updateCombos = (newCombos) => {
         const newCombosList = {
