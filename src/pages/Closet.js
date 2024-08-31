@@ -8,6 +8,7 @@ import GetUserItems from "./GetUserItems";
 import GenerateFit from "./GenerateFit";
 
 function Closet({ isAuth }) {
+    const [onMobile, setOnMobile] = useState(() => {return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream});
     const [currentID, setCurrentID] = useState(() => {
         if(localStorage.getItem("closetID")){
             console.log(localStorage.getItem("closetID"));
@@ -55,6 +56,22 @@ function Closet({ isAuth }) {
             accessories: [],
         })
     }
+
+    useEffect(() => {
+        if(onMobile){
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+        }
+        else{
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+        }
+
+        return () => {
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+        }
+    }, [onMobile])
 
     const updateUserItems = (curItems) => {
         setUserItems(curItems);

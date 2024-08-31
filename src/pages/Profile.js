@@ -146,8 +146,8 @@ function Profile() {
     
     const isFollowing = async () => {
         try {
-            let uFollow;
-            let iFollow;
+            let uFollow = false;
+            let iFollow = false;
             const q = query(collection(db, "users"), where("id", "==", auth.currentUser.uid));
             const querySnapshot = await getDocs(q);
     
@@ -172,7 +172,7 @@ function Profile() {
                 uFollow = true;
             } else {
                 setFollows(false);
-                uFollow = true;
+                uFollow = false;
             }
             if(iFollow && uFollow){
                 setFriends(true);
