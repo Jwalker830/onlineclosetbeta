@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { arrayUnion, arrayRemove, updateDoc, doc, query, collection, where, getDocs, deleteDoc } from "firebase/firestore";
 import { db, auth, provider} from "../firebase-config";
+import { getStorage, ref, deleteObject } from "firebase/storage";
+
 
 const ItemDisplay = ({ isAuth, items, setCurItem, removeItem, isOnMobile }) => {
     const [sortedItems, setSortedItems] = useState({
@@ -14,6 +16,8 @@ const ItemDisplay = ({ isAuth, items, setCurItem, removeItem, isOnMobile }) => {
     });
     const [isSorted, setIsSorted] = useState(false);
     const [hoveredItemId, setHoveredItemId] = useState(null);
+    const storage = getStorage();
+
 
     useEffect(() => {
         if (items.length > 0) {
@@ -56,6 +60,13 @@ const ItemDisplay = ({ isAuth, items, setCurItem, removeItem, isOnMobile }) => {
 
     const handleRemoveItem = async (item) => {
         try {
+            const imageRef = ref(storage, item.id);
+            deleteObject(imageRef).then(() => {
+                console.log("deleted")
+              }).catch((error) => {
+                console.log(error)
+              });
+              
             console.log("removing item");
             if (!auth.currentUser) {
                 console.error("User is not loaded");

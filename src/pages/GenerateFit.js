@@ -205,7 +205,7 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
     
         let dislikeTags = new Set();
     
-        let curPrefs = [...userPrefs.love];
+        let curPrefs = [...userPrefs.love, ...userPrefs.like];
         let curHates = [...userPrefs.hate, ...userPrefs.dislike];
         console.log(curPrefs);
         console.log(curHates);
@@ -239,14 +239,18 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
     
         curTags.forEach(tag => {
             curHates.forEach(combo => {
-                if (combo[0] === tag && !curTags.has(combo[1])) {
+                if (combo[0] === tag) {
                     dislikeTags.add(combo[1]);
+                    curTags.delete(combo[1]);
                 }
-                if (combo[1] === tag && !curTags.has(combo[0])) {
+                if (combo[1] === tag) {
                     dislikeTags.add(combo[0]);
+                    curTags.delete(combo[0]);
                 }
             });
         });
+
+        
     
         console.log(curTags);
         console.log(dislikeTags);
@@ -257,17 +261,18 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
                 if(genPrompt && genPrompt.includes(tag)){
                     curItems.push(item);
                 }
-                if(curTags.has(tag)){
-                    score++;
-                }
-                else if(dislikeTags.has(tag)){
+                if(dislikeTags.has(tag)){
                     score -= 2;
+                }
+                else if(curTags.has(tag)){
+                    score += 5;
                 }
                 else {
                     score--;
                 }
             });
-            if ((score / item.tags.length) > (genPrompt === null ? 0.5 : 0.2)) {
+            if ((score / item.tags.length) > (genPrompt === null ? 0.3 : 0)) {
+                console.log(score / item.tags.length, item.title);
                 curItems.push(item);
             }
         });
@@ -292,7 +297,7 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
     
         outfit.bottom = baseItems.bottom || 
                         (baseItemsList.length > 0 && baseItemsList[0].type === "Bottoms" && baseItemsList[0]) || 
-                        (sortedItems.bottoms && sortedItems.bottoms.length > 0 && getRandomItems(sortedItems.bottoms, 1)[0]) || 
+                        ((sortedItems.bottoms && sortedItems.bottoms.length > 0) && getRandomItems(sortedItems.bottoms, 1)[0]) || 
                         (displayedItems.filter(item => item.type === "Bottoms")[0] || null);
     
         outfit.shoe = baseItems.shoe || 
@@ -301,7 +306,7 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
                       (displayedItems.filter(item => item.type === "Shoes")[0] || null);
     
         outfit.accessories = baseItems.accessories.length > 0 ? baseItems.accessories : 
-                            (sortedItems.accessories && sortedItems.accessories.length > 0 ? getRandomItems(sortedItems.accessories, Math.floor(Math.random() * sortedItems.accessories.length)) : 
+                            (sortedItems.accessories && sortedItems.accessories.length > 0 ? getRandomItems(sortedItems.accessories, Math.floor(Math.random() * 3)) : 
                             [(displayedItems.filter(item => item.title === "No Accessory")[0])]);
     
         console.log(outfit);
