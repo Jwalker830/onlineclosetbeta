@@ -8,7 +8,10 @@ import GetUserItems from "./GetUserItems";
 import GenerateFit from "./GenerateFit";
 
 function Closet({ isAuth }) {
-    const [onMobile, setOnMobile] = useState(() => {return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream});
+    const [onMobile, setOnMobile] = useState(() => {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      });
+      
     const [currentID, setCurrentID] = useState(() => {
         if(localStorage.getItem("closetID")){
             console.log(localStorage.getItem("closetID"));

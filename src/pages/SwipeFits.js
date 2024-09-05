@@ -20,8 +20,10 @@ const SwipeFits = ({ isAuth }) => {
     const [combos, setCombos] = useState([]);
     const [comboPrefs, setComboPrefs] = useState({});
     const [slideDirection, setSlideDirection] = useState(null);
-    const [onMobile, setOnMobile] = useState(() => {return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream});
-
+    const [onMobile, setOnMobile] = useState(() => {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      });
+      
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {

@@ -12,8 +12,10 @@ const TagItems = ({ isAuth }) => {
     const [curIndex, setCurIndex] = useState();
     const [curItem, setCurItem] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [onMobile, setOnMobile] = useState(() => {return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream});
-
+    const [onMobile, setOnMobile] = useState(() => {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      });
+      
     const sortItems = (items) => {
         let sorted = [
             ...(items.filter(item => item.type === "Hat")),

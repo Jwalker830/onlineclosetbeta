@@ -6,8 +6,10 @@ import { useNavigate } from "react-router-dom";
 const DisplayFit = ({ curFit, removeFit, width, curUser }) => {
     const [isFav, setIsFav] = useState(false);
     const [isCurUser, setIsCurUser] = useState(curUser);
-    const [onMobile, setOnMobile] = useState(() => {return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream});
-
+    const [onMobile, setOnMobile] = useState(() => {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      });
+      
     useEffect(() => {
         console.log(isCurUser);
     }, [isCurUser])
