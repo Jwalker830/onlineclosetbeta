@@ -32,7 +32,9 @@ function Login({ setIsAuth }){
                 title: "No Jacket",
                 desc: "",
                 tags: ["No Jacket"],
-                type: "Jacket"
+                type: "Jacket",
+                following: [],
+                followers: []
             }
 
             const noHat = {

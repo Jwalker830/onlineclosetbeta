@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { collection, getDocs, query, where, startAt, endAt } from "firebase/firestore";
 import { db } from "../firebase-config";
 import levenshtein from "fast-levenshtein";
@@ -41,6 +41,10 @@ function Search() {
             console.error("Error searching profiles:", error);
         }
     };
+    
+    useEffect(() => {
+        searchProfiles();
+    }, [search])
 
     const loadProfile = (selected) => {
         localStorage.setItem("profile", JSON.stringify(selected));

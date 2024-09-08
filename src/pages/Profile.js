@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react"; // Added useEffect import
-import { collection, getDocs, query, where, startAt, endAt, updateDoc, doc, arrayUnion, arrayRemove } from "firebase/firestore";
+import React, { useState, useEffect } from "react";
+import { collection, getDocs, query, where, updateDoc, doc, arrayUnion, arrayRemove } from "firebase/firestore";
 import GetUserItems from "./GetUserItems";
+import ProfileList from "./ProfileList";
 import { db, auth } from "../firebase-config";
 import { useNavigate } from "react-router-dom";
 
@@ -13,7 +14,6 @@ function Profile() {
         return null;
     });
     const [profile, setProfile] = useState();
-    const [profileView, setProfileView] = useState("");
     const [items, setItems] = useState([]);
     const [sortedItems, setSortedItems] = useState({
         hats: [],
@@ -27,6 +27,10 @@ function Profile() {
     const [following, setFollowing] = useState();
     const [follows, setFollows] = useState();
     const [friends, setFriends] = useState();
+    const [followingList, setFollowingList] = useState([]);
+    const [followerList, setFollowerList] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [modalType, setModalType] = useState("");
 
     const updateItemList = (newItemList) => {
         setItems(newItemList);
@@ -37,7 +41,7 @@ function Profile() {
             const s = sortPrefItems(items);
             setSortedItems(s);
         }
-    }, [items]); // Trigger effect when items change
+    }, [items]);
 
     useEffect(() => {
         localStorage.removeItem("profile");
@@ -56,9 +60,11 @@ function Profile() {
                 const querySnapshot = await getDocs(q);
                 
                 if (!querySnapshot.empty) {
-                    const userDoc = querySnapshot.docs[0]; // Assuming there's only one matching document
-                    const userData = userDoc.data(); // Retrieve the user data
+                    const userDoc = querySnapshot.docs[0];
+                    const userData = userDoc.data();
                     console.log(userData);
+                    setFollowerList(userData.followers);
+                    setFollowingList(userData.following);
                     setProfile(userData);
                 } else {
                     console.error("No matching user found");
@@ -68,7 +74,6 @@ function Profile() {
             }
         }
     };
-    
 
     const sortPrefItems = (items) => {
         const sorted = {
@@ -143,12 +148,11 @@ function Profile() {
         }, 100)
     }
 
-    
     const isFollowing = async () => {
         try {
             let uFollow = false;
             let iFollow = false;
-            const q = query(collection(db, "users"), where("id", "==", auth.currentUser.uid));
+            const q = query(collection(db, "users"), where("id", "==", profileID));
             const querySnapshot = await getDocs(q);
     
             if (querySnapshot.empty) {
@@ -159,7 +163,19 @@ function Profile() {
             const userDoc = querySnapshot.docs[0];
             const userData = userDoc.data();
     
-            if (userData.following && userData.following.includes(profileID)) {
+            if(userData.following){
+                setFollowingList(userData.following);
+                if (userData.following.includes(auth.currentUser.uid)) {
+                    setFollows(true);
+                    uFollow = true;
+                } else {
+                    setFollows(false);
+                    uFollow = false;
+                }
+            }
+
+            if (userData.followers && userData.followers.includes(auth.currentUser.uid)) {
+                setFollowerList(userData.followers);
                 setFollowing(true);
                 iFollow = true;
             } else {
@@ -167,19 +183,13 @@ function Profile() {
                 iFollow = false;
             }
 
-            if (userData.followers && userData.followers.includes(profileID)) {
-                setFollows(true);
-                uFollow = true;
-            } else {
-                setFollows(false);
-                uFollow = false;
-            }
             if(iFollow && uFollow){
                 setFriends(true);
             }
             else{
                 setFriends(false);
             }
+
         } catch (error) {
             console.error("Error checking following status:", error);
             setFollowing(false);
@@ -194,6 +204,19 @@ function Profile() {
         }
     }, [])
 
+    const toggleModal = (type) => {
+        setModalType(type)
+        setShowModal(true);
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+    };
+
+    const setNewProfileID = (id) => {
+        closeModal();
+        setProfileID(id)
+    }
     return (
         <div className="profileContainer">
         {profile &&
@@ -201,6 +224,24 @@ function Profile() {
                 <GetUserItems setItemList={updateItemList} id={profileID}/>
                 <div className="profileHeader">
                     <h1>{profile.name}</h1>
+                    <div className="profileFollowers profileCount" onClick={() => toggleModal("follower")}>
+                        <h2>Followers</h2>
+                        {followerList && followerList.length >= 0 ?
+
+                        <h3>{followerList.length}</h3>
+                        :
+                        <h3>0</h3>
+                    }
+                    </div>
+                    <div className="profileFollowing profileCount" onClick={() => toggleModal("following")}>
+                        <h2>Following</h2>
+                        {followingList && followingList.length >= 0 ?
+                        
+                        <h3>{followingList.length}</h3>
+                        :
+                        <h3>0</h3>
+                    }
+                    </div>
                 </div>
                 <>{(follows && !friends) && <h3>Follows you</h3>}</>
                 <>{friends && <h3>Friends</h3>}</>
@@ -231,7 +272,16 @@ function Profile() {
                 )}
             </>
         }
-        </div>
+
+        {showModal && modalType !== "" && (
+            <div className="modalOverlay">
+                <div className="modalContent">
+                    <button className="closeModal" onClick={closeModal}>X</button>
+                    <ProfileList profiles={modalType === "follower" ? followerList : followingList} setNewProfile={setNewProfileID}/>
+                </div>
+            </div>
+        )}
+    </div>
     );
 }
 
