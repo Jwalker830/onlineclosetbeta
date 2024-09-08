@@ -45,6 +45,9 @@ function Profile() {
 
     useEffect(() => {
         localStorage.removeItem("profile");
+        if(localStorage.getItem("isAuth")){
+            isFollowing();
+        }
         getProfile();
     }, [profileID])
 
@@ -173,14 +176,15 @@ function Profile() {
                     uFollow = false;
                 }
             }
-
-            if (userData.followers && userData.followers.includes(auth.currentUser.uid)) {
+            if(userData.followers){
                 setFollowerList(userData.followers);
-                setFollowing(true);
-                iFollow = true;
-            } else {
-                setFollowing(false);
-                iFollow = false;
+                if (userData.followers.includes(auth.currentUser.uid)) {
+                    setFollowing(true);
+                    iFollow = true;
+                } else {
+                    setFollowing(false);
+                    iFollow = false;
+                }
             }
 
             if(iFollow && uFollow){
@@ -247,10 +251,8 @@ function Profile() {
                 <>{friends && <h3>Friends</h3>}</>
                 {auth.currentUser && auth.currentUser.uid !== profileID &&
                     <>
-                        {following ?
-                            <button onClick={unfollowUser}>Unfollow</button>
-                            :
-                            <button onClick={followUser}>Follow</button>
+                        {following !== null &&
+                            <button onClick={following ? unfollowUser : followUser}>{following ? "Unfollow" : "Follow"}</button>
                         }
                     </>
                 }
