@@ -331,7 +331,7 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
                 <>
                     <p>Loading...</p>
                     <GetUserItems setItemList={updateItemList} id={id}/>
-                    <GetUserPrefs setPrefs={updatePrefsList}/>
+                    <GetUserPrefs setPrefs={updatePrefsList} id={id}/>
                 </>
             ) : (
                 <>

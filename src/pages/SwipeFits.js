@@ -403,7 +403,7 @@ const SwipeFits = ({ isAuth }) => {
     return (
         <div>
             <GetUserItems setItemList={updateItemList} id={auth.currentUser.uid}/>
-            <GetUserPrefs setPrefs={updateComboList}/>
+            <GetUserPrefs setPrefs={updateComboList} id={auth.currentUser.uid}/>
             <div className='swipeFitContainer' style={{
                     transition: 'transform 0.3s ease-in-out',
                     transform: slideDirection ? 

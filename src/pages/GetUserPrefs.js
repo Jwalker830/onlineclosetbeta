@@ -2,20 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { db, auth } from "../firebase-config";
 import { query, collection, where, getDocs, doc, getDoc } from "firebase/firestore";
 
-const GetUserPrefs = ({ isAuth, setPrefs }) => {
+const GetUserPrefs = ({ isAuth, setPrefs, id }) => {
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                getPrefs();
-            }
-        });    
-        return () => unsubscribe();
-    }, []);
+        if (id) {
+            getPrefs();
+        }
+    }, [id]);
 
     const getPrefs = async () => {
         try {
             let combos = "";
-            const docRef = doc(db, "users", auth.currentUser.uid);
+            const docRef = doc(db, "users", id);
             const docSnap = await getDoc(docRef);
     
             if (docSnap.exists()) {

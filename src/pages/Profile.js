@@ -4,6 +4,7 @@ import GetUserItems from "./GetUserItems";
 import ProfileList from "./ProfileList";
 import { db, auth } from "../firebase-config";
 import { useNavigate } from "react-router-dom";
+import ViewField from "./ViewField";
 
 function Profile() {
     let navigate = useNavigate();
@@ -31,6 +32,20 @@ function Profile() {
     const [followerList, setFollowerList] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [modalType, setModalType] = useState("");
+    const [curItem, setCurItem] = useState();
+    const [onMobile, setOnMobile] = useState(() => {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    });
+    
+    const [curIndex, setCurIndex] = useState();
+
+    const updateCurIndex = (newIndex) => {
+        setCurIndex(newIndex);
+    };
+
+    const updateCurItem = (item) => {
+        setCurItem(item);
+    };
 
     const updateItemList = (newItemList) => {
         setItems(newItemList);
@@ -87,6 +102,7 @@ function Profile() {
             shoes: [],
             accessories: [],
             other: [],
+            flat: []
         };
 
         sorted.hats = items.filter(item => item.type === "Hat" && item.title !== "No Hat");
@@ -96,6 +112,16 @@ function Profile() {
         sorted.shoes = items.filter(item => item.type === "Shoes");
         sorted.accessories = items.filter(item => item.type === "Accessory" && item.title !== "No Accessory");
         sorted.other = items.filter(item => item.type === "");
+        sorted.flat = [            
+            ...sorted.hats,
+            ...sorted.jackets,
+            ...sorted.tops,
+            ...sorted.bottoms,
+            ...sorted.shoes,
+            ...sorted.accessories,
+            ...sorted.other
+        ]
+
         console.log(items);
 
         return sorted;
@@ -108,6 +134,9 @@ function Profile() {
                 {items.map((item) => (
                     <div className="profileItem"
                         key={item.id}
+                        onClick={() => {
+                            handleViewItem(item);
+                        }}
                     >
                         <img 
                             src={item.imgURL} 
@@ -221,9 +250,14 @@ function Profile() {
         closeModal();
         setProfileID(id)
     }
+
+    const handleViewItem = (item) => {
+        setCurItem(item);
+    }
+
     return (
         <div className="profileContainer">
-        {profile &&
+        {profile && !curItem ?
             <>
                 <GetUserItems setItemList={updateItemList} id={profileID}/>
                 <div className="profileHeader">
@@ -272,6 +306,10 @@ function Profile() {
                 ) : (
                     <div>No Items</div>
                 )}
+            </>
+            :
+            <>
+                {sortedItems.flat && curItem && profile && <ViewField item={curItem} setCurItem={updateCurItem} index={sortedItems.flat.indexOf(curItem)} itemArray={sortedItems.flat} setCurIndex={updateCurIndex} isOnMobile={onMobile}/>}
             </>
         }
 
