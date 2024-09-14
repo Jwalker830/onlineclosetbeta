@@ -18,7 +18,9 @@ function Closet({ isAuth }) {
             return JSON.parse(localStorage.getItem("closetID"));
         }
         return null;
-    })
+    });
+    const [logging, setLogging] = useState(localStorage.getItem("logging"));
+    const [date, setDate] = useState(localStorage.getItem("date"));
     const [userItems, setUserItems] = useState(null);
     const [sortedItems, setSortedItems] = useState(null);
     const [curFit, setCurFit] = useState(null);
@@ -359,7 +361,7 @@ function Closet({ isAuth }) {
                         </div>
                     </div>
                     <div className="midCloset scroll-container">
-                        <GenerateFit passFit={curFit} setNewFit={loadCurFit} baseItems={lockedItems} clearLockedItems={clearLocked} id={currentID}/>
+                        <GenerateFit passFit={curFit} setNewFit={loadCurFit} baseItems={lockedItems} clearLockedItems={clearLocked} id={currentID} date={date} logging={logging}/>
                     </div>
                     <div className="rightCloset scroll-container">
                         <div className="articleDisplay scroll-container">

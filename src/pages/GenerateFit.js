@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { setDoc, doc, query, collection, where, getDocs } from "firebase/firestore";
+import { setDoc, doc, query, collection, where, getDocs, updateDoc, arrayUnion } from "firebase/firestore";
 import { db, auth, provider} from "../firebase-config";
 import { signInWithPopup } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +8,7 @@ import GetPrefItems from './GetPrefItems';
 import GetUserPrefs from './GetUserPrefs';
 import DisplayFit from "./DisplayFit";
 
-function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, id }) {
+function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, id, logging, date }) {
     const tcom = require('thesaurus-com');
     const [isCurUser, setIsCurUser] = useState()
     const [prefItems, setPrefItems] = useState({
@@ -59,6 +59,8 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
     useEffect(() => {
         if(auth.currentUser){
             setIsCurUser(id === auth.currentUser.uid);
+            localStorage.removeItem("date")
+            localStorage.removeItem("logging")
         }
         else {
             setIsCurUser(false);
@@ -325,6 +327,20 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
 
     let navigate = useNavigate();
 
+    const handleLogging = async () => {
+        try {
+            const userDoc = doc(db, 'users', auth.currentUser.uid);
+
+            await updateDoc(userDoc, {
+                fitLog: arrayUnion(date + " " + JSON.stringify(curFit))
+            });
+    
+            console.log('logged' + date + " " + JSON.stringify(curFit));
+        } catch (error) {
+            console.error('Error updating fit log:', error);
+        }
+    }
+
     return (
         <div  className='randFitContainer'>
             {loading ? (
@@ -338,10 +354,14 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
                     <GetPrefItems setPrefItems={updatePrefItems} items={displayedItems} prefs={userPrefs}/>
                     {curFit !== null &&
                         <div className='generatorContainer'>
+                            {logging ?
+                            <button onClick={handleLogging}>Log Outfit</button>
+                            :
                             <div className='fitTagInput'>
                                 <button onClick={randomizeFit} className='newFitButton'>New Outfit</button>
                                 <input placeholder='tag...' onChange={(e) => updatePrompt(e.target.value)}></input>
                             </div>
+                            }
                             <DisplayFit curFit={curFit} removeFit={removeFit} curUser={isCurUser}/>
                         </div>
                     }

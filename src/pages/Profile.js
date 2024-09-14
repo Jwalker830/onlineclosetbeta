@@ -36,8 +36,9 @@ function Profile() {
     const [onMobile, setOnMobile] = useState(() => {
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     });
-    
+    const [editName, setEditName] = useState(false);
     const [curIndex, setCurIndex] = useState();
+    const [tempName, setTempName] = useState();
 
     const updateCurIndex = (newIndex) => {
         setCurIndex(newIndex);
@@ -84,6 +85,7 @@ function Profile() {
                     setFollowerList(userData.followers);
                     setFollowingList(userData.following);
                     setProfile(userData);
+                    setTempName(userData.name);
                 } else {
                     console.error("No matching user found");
                 }
@@ -255,13 +257,45 @@ function Profile() {
         setCurItem(item);
     }
 
+    const handleEditName = async () => {
+        if(editName){
+            const userRef = doc(db, 'users', profileID);
+            await updateDoc(userRef, {
+              name: tempName
+            });
+            setProfile({...profile, name: tempName});
+            setEditName(false);
+        }
+        else{
+            setEditName(true);
+        }
+    }
+
     return (
         <div className="profileContainer">
         {profile && !curItem ?
             <>
                 <GetUserItems setItemList={updateItemList} id={profileID}/>
                 <div className="profileHeader">
-                    <h1>{profile.name}</h1>
+                    {auth && profileID === auth.currentUser.uid ?
+                    <div className="namePlate">
+                        {!editName ? 
+                            <>
+                                <h1>{profile.name}</h1>
+                                <button onClick={handleEditName}>✏️</button>
+                            </>
+                            :
+                            <>
+                                <input type="text" id="name" name="name" placeholder="Display Name..." value={tempName} onChange={(e) => setTempName(e.target.value)} />
+                                <button onClick={handleEditName}>✔️</button>
+                            </>
+                        }
+                    </div>
+                    :
+                    <>
+                        <h1>{profile.name}</h1>
+                    </>
+                    }
                     <div className="profileFollowers profileCount" onClick={() => toggleModal("follower")}>
                         <h2>Followers</h2>
                         {followerList && followerList.length >= 0 ?

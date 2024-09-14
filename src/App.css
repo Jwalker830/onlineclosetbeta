@@ -176,6 +176,11 @@ button[type="submit"] {
   justify-content: center;
 }
 
+.calendarDay .fitContainer{
+  height: 85px;
+  width: 28px;
+}
+
 .favFitsContainer .fitContainer{
   margin: 30px;
   height: 300px;
@@ -263,6 +268,10 @@ button[type="submit"] {
   margin-bottom: -90%;
   max-width: 60%;
   height: auto;
+}
+
+.accessoryPic .calendarDay{
+  display: none;
 }
 
 .shoePic{
@@ -545,6 +554,18 @@ input{
   margin: 10px;
 }
 
+.namePlate{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.namePlate button{
+  margin-left: 5px;
+  height: 50%;
+}
+
 .profileCount{
   display: flex;
   flex-direction: column;
@@ -603,6 +624,8 @@ input{
   display: flex;
   flex-direction: column;
   justify-content: center;
+  max-height: 300px;
+  overflow: scroll;
 }
 
 .searchBar{
@@ -631,7 +654,7 @@ input{
 
 .result{
   background-color: var(--color2);
-  width: 50vw;
+  width: 30vw;
   margin-top: 10px;
   padding: 10px;
   border-radius: 5px;
@@ -669,4 +692,78 @@ input{
   border: none;
   font-size: 18px;
   cursor: pointer;
+}
+
+.calendarContainer {
+  width: 1000px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr); /* 7 columns for 7 days in a week */
+  gap: 5px;
+  margin: auto;
+}
+
+.calendarDay {
+  position: relative;
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: right;
+  height: 100px;
+  width: 100px;
+  transition: border 0.3s ease, padding 0.3s ease; /* Apply transition to both border and padding */
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.calendarDay:hover {
+  padding: 7px;
+  border: 3px solid #000;
+}
+
+.dayNumber {
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-bottom: -20px;
+}
+
+.logButton {
+  display: none;
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--color3);
+  color: var(--color0);
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.calendarDay:hover .logButton {
+  display: flex;
+  opacity: 0;
+  transition: opacity 0.3s ease; /* Add smooth transition for button appearance */
+}
+
+.calendarDay:hover .logButton {
+  opacity: 1;
+}
+
+.outfitLogContainer{
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.monthHeader{
+  display: flex;
+  flex-direction: row;
+  width: 40%;
+  justify-content: space-around;
+  align-items: center;
 }
