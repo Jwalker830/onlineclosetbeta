@@ -138,7 +138,7 @@ function CalendarComponent({ month, id }) {
                             <>
                                 <DisplayFit curFit={fit} />
                                 <>
-                                {curID === auth.currentUser.uid &&
+                                {auth.currentUser && curID === auth.currentUser.uid &&
                                     <button 
                                         className="logButton" 
                                         onClick={() => handleRemoveLog(day)}
@@ -150,7 +150,7 @@ function CalendarComponent({ month, id }) {
                             </>
                         :
                             <>
-                            {curID === auth.currentUser.uid &&
+                            {auth.currentUser && curID === auth.currentUser.uid &&
                                 <button 
                                     className="logButton" 
                                     onClick={() => handleLogButton(day)}

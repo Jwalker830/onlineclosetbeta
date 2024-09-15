@@ -278,7 +278,7 @@ function Profile() {
             <>
                 <GetUserItems setItemList={updateItemList} id={profileID}/>
                 <div className="profileHeader">
-                    {auth && profileID === auth.currentUser.uid ?
+                    {auth.currentUser && profileID === auth.currentUser.uid ?
                     <div className="namePlate">
                         {!editName ? 
                             <>
@@ -348,7 +348,7 @@ function Profile() {
             </>
         }
 
-        {profile &&   
+        {profile && !curItem &&  
             <>
                 <h1>Outfit Log</h1>
                 <OutfitLog profileID={profile.id}/>
