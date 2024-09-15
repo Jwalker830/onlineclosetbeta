@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CalendarComponent from "./CalendarComponent";
 
-function OutfitLog() {
+function OutfitLog({ profileID }) {
     const monthNames = [
         "January", "February", "March", "April", "May", "June", 
         "July", "August", "September", "October", "November", "December"
@@ -11,11 +11,17 @@ function OutfitLog() {
         const ind = new Date().getMonth();
         return ind;
     });
+    const [curProf, setCurProf] = useState()
     const [month, setMonth] = useState();
     let navigate = useNavigate();
 
     useEffect(() => {
+        setCurProf(profileID);
+    }, [profileID])
+
+    useEffect(() => {
         setMonth(monthNames[monthInd]);
+        console.log(profileID);
     }, [monthInd])
 
     const handleMonthChange = (change) => {
@@ -29,7 +35,8 @@ function OutfitLog() {
                 <h1>{month}</h1>
                 <h2 onClick={() => {handleMonthChange(1)}}>▶</h2>
             </div>
-            <CalendarComponent month={monthInd + 1}/>
+            {curProf && <CalendarComponent month={monthInd + 1} id={curProf}/>}
+            
         </div>
     );
 }

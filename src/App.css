@@ -270,6 +270,11 @@ button[type="submit"] {
   height: auto;
 }
 
+.calendarDay .accessoryPic {
+  margin-bottom: -250%;
+}
+
+
 .accessoryPic .calendarDay{
   display: none;
 }
@@ -623,7 +628,6 @@ input{
 .profileResults{
   display: flex;
   flex-direction: column;
-  justify-content: center;
   max-height: 300px;
   overflow: scroll;
 }

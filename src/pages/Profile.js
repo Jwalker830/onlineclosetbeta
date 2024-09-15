@@ -5,6 +5,7 @@ import ProfileList from "./ProfileList";
 import { db, auth } from "../firebase-config";
 import { useNavigate } from "react-router-dom";
 import ViewField from "./ViewField";
+import OutfitLog from "./OutfitLog";
 
 function Profile() {
     let navigate = useNavigate();
@@ -344,6 +345,13 @@ function Profile() {
             :
             <>
                 {sortedItems.flat && curItem && profile && <ViewField item={curItem} setCurItem={updateCurItem} index={sortedItems.flat.indexOf(curItem)} itemArray={sortedItems.flat} setCurIndex={updateCurIndex} isOnMobile={onMobile}/>}
+            </>
+        }
+
+        {profile &&   
+            <>
+                <h1>Outfit Log</h1>
+                <OutfitLog profileID={profile.id}/>
             </>
         }
 

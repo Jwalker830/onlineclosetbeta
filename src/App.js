@@ -10,7 +10,6 @@ import Closet from "./pages/Closet.js";
 import FavFits from './pages/FavFits.js';
 import Search from './pages/Search.js';
 import Profile from './pages/Profile.js';
-import OutfitLog from "./pages/OutfitLog.js";
 
 function App() {
   const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth"));
@@ -29,7 +28,6 @@ function App() {
         {isAuth && <Link to="/" onClick={() => {localStorage.removeItem("closetID")}}>Closet</Link>}
         {isAuth && <Link to="/fits">Outfits</Link>}
         {isAuth && <Link to="/tagitems">Tag Items</Link>}
-        {isAuth && <Link to="/logfits">Log Fits</Link>}
         {isAuth && <Link to="/profile">Profile</Link>}
         <Link to="/search">Search</Link>
         {!isAuth ? <Link to="/login">Login</Link> : 
@@ -45,7 +43,6 @@ function App() {
         <Route path="/fits" element={<FavFits isAuth={isAuth} />} />
         <Route path="/search" element={<Search isAuth={isAuth} />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/logfits" element={<OutfitLog />} />
         <Route path="/" element={<Closet isAuth={isAuth} />} />
       </Routes>
     </Router>
