@@ -110,9 +110,6 @@ function Closet({ isAuth }) {
             const sorted = sortUserItems();
             setSortedItems(sorted);
         }
-        else{
-            navigate("/tagitems");
-        }
     }, [userItems]);
 
     const sortUserItems = () => {
@@ -131,6 +128,11 @@ function Closet({ isAuth }) {
         sorted.bottoms = userItems.filter(item => item.type === "Bottoms");
         sorted.shoes = userItems.filter(item => item.type === "Shoes");
         sorted.accessories = userItems.filter(item => item.type === "Accessory");
+
+        
+        if(sorted.tops.length < 1 || sorted.bottoms.length < 1 || sorted.shoes.length < 1){
+            navigate("/tagitems");
+        }
 
         return sorted;
     }
