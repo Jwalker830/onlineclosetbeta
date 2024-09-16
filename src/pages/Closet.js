@@ -110,6 +110,9 @@ function Closet({ isAuth }) {
             const sorted = sortUserItems();
             setSortedItems(sorted);
         }
+        else{
+            navigate("/tagitems");
+        }
     }, [userItems]);
 
     const sortUserItems = () => {
