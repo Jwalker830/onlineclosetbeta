@@ -21,7 +21,6 @@ function CalendarComponent({ month, id }) {
     }, [id])
 
     useEffect(() => {
-        // Generate days array for the month
         const tempArray = [];
         for (let i = 1; i <= daysInMonth; i++) {
             tempArray.push(i);
@@ -29,43 +28,43 @@ function CalendarComponent({ month, id }) {
         setDaysArray(tempArray);
     }, [daysInMonth, month]);
 
+    const getLogs = async () => {
+        try {
+            if (!curID) {
+                console.error("User is not loaded");
+                return;
+            }
+    
+            const q = query(collection(db, "users"), where("id", "==", curID));
+            const querySnapshot = await getDocs(q);
+            const fitSet = new Set();
+    
+            await Promise.all(querySnapshot.docs.map(async (userDoc) => {
+                const userData = userDoc.data();
+                await Promise.all(userData.fitLog.map(async (fit) => {
+                    try {
+                        let parsedFit = JSON.parse(fit.slice(fit.indexOf('{')));
+                        const date = fit.slice(0, fit.indexOf('{'));
+                        fitSet.add({
+                            date: new Date(date),
+                            ...parsedFit
+                        });
+                    } catch (error) {
+                        console.error('Error parsing accessories:', error);
+                    }
+                }));
+            }));
+            setFitLog(Array.from(fitSet));
+        } catch (error) {
+            console.error("Error fetching items:", error);
+        }
+    };
+
     useEffect(() => {
         console.log(curID);
-        // Fetch fitLog data from Firestore
-        const getLogs = async () => {
-            try {
-                if (!curID) {
-                    console.error("User is not loaded");
-                    return;
-                }
-        
-                const q = query(collection(db, "users"), where("id", "==", curID));
-                const querySnapshot = await getDocs(q);
-                const fitSet = new Set();
-        
-                await Promise.all(querySnapshot.docs.map(async (userDoc) => {
-                    const userData = userDoc.data();
-                    await Promise.all(userData.fitLog.map(async (fit) => {
-                        try {
-                            let parsedFit = JSON.parse(fit.slice(fit.indexOf('{')));
-                            const date = fit.slice(0, fit.indexOf('{'));
-                            fitSet.add({
-                                date: new Date(date), // Convert date string to Date object
-                                ...parsedFit
-                            });
-                        } catch (error) {
-                            console.error('Error parsing accessories:', error);
-                        }
-                    }));
-                }));
-                setFitLog(Array.from(fitSet));
-            } catch (error) {
-                console.error("Error fetching items:", error);
-            }
-        };
         
         getLogs();
-    }, [curID]); // Run only once on component mount
+    }, [curID]);
 
     const handleLogButton = (day) => {
         let curDate = new Date(year, month - 1, day);
@@ -86,10 +85,8 @@ function CalendarComponent({ month, id }) {
                 return;
             }
     
-            // Convert the day to a Date object and format it to match the stored format
             const fitDate = new Date(year, month - 1, day).toString();
     
-            // Fetch the user document
             const userDocRef = doc(db, "users", curID);
             const userDocSnapshot = await getDoc(userDocRef);
             
@@ -101,10 +98,9 @@ function CalendarComponent({ month, id }) {
             const userData = userDocSnapshot.data();
             const fitLog = userData.fitLog || [];
     
-            // Find the fit to remove
             const fitToRemove = fitLog.find(fit => {
-                const [storedDate, jsonFit] = fit.split('{', 2); // Split into date and JSON parts
-                return storedDate.trim() === fitDate; // Compare dates
+                const [storedDate, jsonFit] = fit.split('{', 2);
+                return storedDate.trim() === fitDate;
             });
     
             if (!fitToRemove) {
@@ -112,13 +108,14 @@ function CalendarComponent({ month, id }) {
                 return;
             }
     
-            // Update Firestore to remove the fit
             await updateDoc(userDocRef, {
                 fitLog: arrayRemove(fitToRemove)
             });
-    
-            // Update local state
-            setFitLog(prevFitLog => prevFitLog.filter(fit => fit.date !== fitToRemove.split('{', 2)[0]));
+
+            console.log(fitLog);
+            console.log(fitToRemove);
+
+            getLogs(); //find a different solution for this
     
             console.log("Fit removed successfully");
         } catch (error) {
