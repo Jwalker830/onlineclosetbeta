@@ -5,6 +5,9 @@ import { updateDoc, arrayUnion, doc, setDoc, deleteDoc, arrayRemove } from 'fire
 import { MdOutlineFileUpload   } from 'react-icons/md';
 import { db, auth } from '../firebase-config';
 import { useNavigate } from "react-router-dom";
+import AutoTag from './AutoTag';  // Adjust the import path as needed
+
+
 
 const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile }) => {
     const [itemTitle, setItemTitle] = useState("");
@@ -238,6 +241,10 @@ const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile 
         navigate("/");
       }
       
+      const handleAutoTagResult = (tags) => {
+        setItemTags(tags.join(", "));  // Update itemTags state with the tags for display
+    };
+
 
     return (
         itemDisplay !== null && (
@@ -280,8 +287,15 @@ const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile 
                     </div>
                     <div className="input-container">
                         <label htmlFor="tags">Tags:</label>
-                        <textarea id="tags" name="tags" placeholder="Enter tags..." value={itemTags} onChange={(e) => setItemTags(e.target.value)} />
-                    </div>
+                        <textarea
+                        id="tags"
+                        name="tags"
+                        placeholder="Enter tags..."
+                        value={itemTags}
+                        onChange={(e) => setItemTags(e.target.value)}
+                        />
+                        <AutoTag onAutoTag={handleAutoTagResult} item={itemDisplay} />
+                        </div>
                     <div>
                         <div onChange={(e) => setItemType(e.target.value)}>
                             <label><input type="radio" name="itemType" value="Hat" checked={itemType === "Hat"} /> Hat</label><br/>

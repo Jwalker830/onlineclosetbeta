@@ -10,6 +10,7 @@ import Closet from "./pages/Closet.js";
 import FavFits from './pages/FavFits.js';
 import Search from './pages/Search.js';
 import Profile from './pages/Profile.js';
+import AutoTag from './pages/AutoTag.js'; // Import the AutoTag page
 
 function App() {
   const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth"));
@@ -29,6 +30,7 @@ function App() {
         {isAuth && <Link to="/fits">Outfits</Link>}
         {isAuth && <Link to="/tagitems">Tag Items</Link>}
         {isAuth && <Link to="/profile">Profile</Link>}
+        {isAuth && <Link to="/autotag">Auto Tag</Link>} {/* Add link to Auto Tag */}
         <Link to="/search">Search</Link>
         {!isAuth ? <Link to="/login">Login</Link> : 
         <>
@@ -43,6 +45,7 @@ function App() {
         <Route path="/fits" element={<FavFits isAuth={isAuth} />} />
         <Route path="/search" element={<Search isAuth={isAuth} />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/autotag" element={<AutoTag isAuth={isAuth} />} /> {/* Auto Tag route */}
         <Route path="/" element={<Closet isAuth={isAuth} />} />
       </Routes>
     </Router>
