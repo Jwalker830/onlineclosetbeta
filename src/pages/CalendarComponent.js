@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { db, auth } from "../firebase-config";
 import { query, collection, where, getDocs, getDoc, updateDoc, doc, arrayRemove } from "firebase/firestore";
 import DisplayFit from './DisplayFit';
+import moment from 'moment';
 
 function CalendarComponent({ month, id }) {
     const year = new Date().getFullYear();
@@ -110,6 +111,10 @@ function CalendarComponent({ month, id }) {
     
             await updateDoc(userDocRef, {
                 fitLog: arrayRemove(fitToRemove)
+            });
+
+            await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+                actions: arrayRemove({ user: auth.currentUser.uid, type: "fit", content: fitToRemove, time: moment().format('YYYY-MM-DD HH:mm:ss') })
             });
 
             console.log(fitLog);

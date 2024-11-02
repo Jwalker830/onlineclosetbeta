@@ -95,7 +95,6 @@ function Closet({ isAuth }) {
             }
         });
 
-        // Cleanup subscription on unmount
         return () => unsubscribe();
     }, [navigate]);
 
@@ -131,7 +130,12 @@ function Closet({ isAuth }) {
 
         
         if(sorted.tops.length < 1 || sorted.bottoms.length < 1 || sorted.shoes.length < 1){
-            navigate("/tagitems");
+            if (isAuth) {
+                navigate("/tagitems");
+            }
+            else {
+                navigate("/search");
+            }
         }
 
         return sorted;

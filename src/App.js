@@ -11,6 +11,7 @@ import FavFits from './pages/FavFits.js';
 import Search from './pages/Search.js';
 import Profile from './pages/Profile.js';
 import AutoTag from './pages/AutoTag.js'; // Import the AutoTag page
+import Feed from './pages/Feed.js';
 
 function App() {
   const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth"));
@@ -25,12 +26,12 @@ function App() {
 
   return (
     <Router basename="/onlineclosetbeta">
-      <nav>
+          <nav>
+              {isAuth && <Link to="/feed">Feed</Link>}
         {isAuth && <Link to="/" onClick={() => {localStorage.removeItem("closetID")}}>Closet</Link>}
         {isAuth && <Link to="/fits">Outfits</Link>}
         {isAuth && <Link to="/tagitems">Tag Items</Link>}
         {isAuth && <Link to="/profile">Profile</Link>}
-        {isAuth && <Link to="/autotag">Auto Tag</Link>} {/* Add link to Auto Tag */}
         <Link to="/search">Search</Link>
         {!isAuth ? <Link to="/login">Login</Link> : 
         <>
@@ -45,8 +46,8 @@ function App() {
         <Route path="/fits" element={<FavFits isAuth={isAuth} />} />
         <Route path="/search" element={<Search isAuth={isAuth} />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/autotag" element={<AutoTag isAuth={isAuth} />} /> {/* Auto Tag route */}
-        <Route path="/" element={<Closet isAuth={isAuth} />} />
+              <Route path="/" element={<Closet isAuth={isAuth} />} />
+              <Route path="/feed" element={<Feed isAuth={isAuth}/> } />
       </Routes>
     </Router>
   );

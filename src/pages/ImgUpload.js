@@ -5,17 +5,19 @@ import { updateDoc, arrayUnion, doc, setDoc, deleteDoc, arrayRemove } from 'fire
 import { db, auth } from '../firebase-config';
 import { MdOutlineFileUpload   } from 'react-icons/md';
 import Pica from 'pica'; // Import Pica
+import moment from 'moment';
 
 const ImgUpload = ({ addItemList }) => {
   const [curItem, setCurItem] = useState();
   const [imageFile, setImageFile] = useState(null);
-  const [imageList, setImageList] = useState([]);
+    const [imageList, setImageList] = useState([]);
   const [processedImage, setProcessedImage] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef(null);
   const [fileNameText, setFileNameText] = useState("Click to upload a garment");
-  let itemList = [];
+    let itemList = [];
+    let procImgCodes = [];
 
   const pica = Pica();
 
@@ -50,7 +52,11 @@ const ImgUpload = ({ addItemList }) => {
       await handleUpload(imageList[i]);
       setUploadProgress(((i + 1) / imageList.length) * 100); // Update progress
     }
-    setIsUploading(false);
+      setIsUploading(false);
+      console.log(procImgCodes.join(", "));
+      await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          actions: arrayUnion({ user: auth.currentUser.uid, type: "item", content: procImgCodes.join(", "), time: moment().format('YYYY-MM-DD HH:mm:ss') })
+      });
   }
 
   const handleUpload = async (image) => {
@@ -102,7 +108,7 @@ const ImgUpload = ({ addItemList }) => {
               },
               () => {
                 // Image uploaded successfully, get download URL
-                getDownloadURL(uploadTask.snapshot.ref).then((imgURL) => {
+                  getDownloadURL(uploadTask.snapshot.ref).then((imgURL) => {
                   addItem(imgURL, code, primaryColor, secondaryColor); // Add item to Firestore
                 }).catch((error) => {
                   console.error('Error getting download URL:', error);
@@ -257,6 +263,7 @@ const ImgUpload = ({ addItemList }) => {
     await updateDoc(doc(db, 'users', auth.currentUser.uid), {
       items: arrayUnion({ id: code })
     });
+      procImgCodes.push(code);
     itemList.push(itemObj);
     addItemList(itemObj);
     console.log(itemList);

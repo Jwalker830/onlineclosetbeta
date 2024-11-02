@@ -7,6 +7,7 @@ import GetUserItems from "./GetUserItems";
 import GetPrefItems from './GetPrefItems';
 import GetUserPrefs from './GetUserPrefs';
 import DisplayFit from "./DisplayFit";
+import moment from 'moment';
 
 function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, id, logging, date }) {
     const tcom = require('thesaurus-com');
@@ -336,6 +337,12 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
             });
     
             console.log('logged' + date + " " + JSON.stringify(curFit));
+
+            await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+                actions: arrayUnion({ user: auth.currentUser.uid, type: "fit", content: JSON.stringify(curFit), time: moment().format('YYYY-MM-DD HH:mm:ss') })
+            });
+
+            console.log("logged ", { type: "fit", content: JSON.stringify(curFit), time: moment().format('YYYY-MM-DD HH:mm:ss') });
         } catch (error) {
             console.error('Error updating fit log:', error);
         }

@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "https://jwalker830.github.io/onlineclosetbeta",
   "dependencies": {
+    "@google-cloud/vision": "^4.3.2",
     "@tensorflow-models/body-pix": "^2.2.1",
     "@tensorflow/tfjs": "^4.20.0",
     "@testing-library/jest-dom": "^5.17.0",
@@ -15,6 +16,7 @@
     "firebase": "^10.12.3",
     "gh-pages": "^6.1.1",
     "icons": "^1.0.0",
+    "moment": "^2.30.1",
     "pica": "^9.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
