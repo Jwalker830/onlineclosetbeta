@@ -7,6 +7,7 @@ function Feed({ isAuth, profileID }) {
     const [following, setFollowing] = useState([]);
     const [feed, setFeed] = useState([]);
     const [sortedFeed, setSortedFeed] = useState([]);
+    const [checked, setChecked] = useState(false);
 
     // Fetch the feed based on the following users
     const getFeed = async () => {
@@ -61,7 +62,7 @@ function Feed({ isAuth, profileID }) {
             const actionsFromAll = await Promise.all(promises);
             const flatActions = actionsFromAll.flat();
 
-            // Set the combined feed without duplicating
+            setChecked(true);
             setFeed([...userActions, ...flatActions]);
 
         } catch (error) {
@@ -71,7 +72,6 @@ function Feed({ isAuth, profileID }) {
 
     const getUserFeed = async () => {
         try {
-            console.log("A");
 
             // Get the current user's data
             const q = query(collection(db, "users"), where("id", "==", profileID));
@@ -93,7 +93,11 @@ function Feed({ isAuth, profileID }) {
                 }));
             }
 
-            setFeed(userActions);
+            setChecked(true);
+
+            if (userActions.length > 0) {
+                setFeed(userActions);
+            }
 
         } catch (error) {
             console.error("Error fetching profiles:", error);
@@ -112,11 +116,14 @@ function Feed({ isAuth, profileID }) {
         }
     }, [feed]);
 
-    // Fetch the feed whenever `isAuth` changes
     useEffect(() => {
         if (profileID) {
+            setFeed([]);
+            setSortedFeed([]);
             getUserFeed();
         } else if (isAuth && !profileID) {
+            setFeed([]);
+            setSortedFeed([]);
             getFeed();
         }
     }, [isAuth, profileID]);
@@ -140,7 +147,18 @@ function Feed({ isAuth, profileID }) {
                     })}
                 </div>
             ) : (
-                <p>Loading...</p>
+                    <>
+                        {
+                            checked ?
+                                <>
+                                    {
+                                        feed.length <= 0 && <p>No Actions to Show</p>
+                                    }
+                                </>
+                                :
+                                <p>Loading...</p>
+                        }
+                    </>
             )}
         </div>
     );
