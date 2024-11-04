@@ -3,7 +3,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { db, auth } from "../firebase-config";
 import DisplayFit from "./DisplayFit";
 
-function Feed({ isAuth }) {
+function Feed({ isAuth, profileID }) {
     const [following, setFollowing] = useState([]);
     const [feed, setFeed] = useState([]);
     const [sortedFeed, setSortedFeed] = useState([]);
@@ -69,6 +69,37 @@ function Feed({ isAuth }) {
         }
     };
 
+    const getUserFeed = async () => {
+        try {
+            console.log("A");
+
+            // Get the current user's data
+            const q = query(collection(db, "users"), where("id", "==", profileID));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                console.error("No user document found");
+                return;
+            }
+
+            const userDoc = querySnapshot.docs[0];
+            const userData = userDoc.data();
+
+            let userActions = [];
+            if (userData.actions) {
+                userActions = userData.actions.map((action) => ({
+                    action,
+                    name: userData.name
+                }));
+            }
+
+            setFeed(userActions);
+
+        } catch (error) {
+            console.error("Error fetching profiles:", error);
+        }
+    };
+
 
     // Sort feed when it's updated
     useEffect(() => {
@@ -83,10 +114,12 @@ function Feed({ isAuth }) {
 
     // Fetch the feed whenever `isAuth` changes
     useEffect(() => {
-        if (isAuth) {
+        if (profileID) {
+            getUserFeed();
+        } else if (isAuth && !profileID) {
             getFeed();
         }
-    }, [isAuth]);
+    }, [isAuth, profileID]);
 
     return (
         <div className="feedContainer">

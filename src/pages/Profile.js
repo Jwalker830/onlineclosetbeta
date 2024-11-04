@@ -6,6 +6,7 @@ import { db, auth } from "../firebase-config";
 import { useNavigate } from "react-router-dom";
 import ViewField from "./ViewField";
 import OutfitLog from "./OutfitLog";
+import Feed from "./Feed";
 
 function Profile() {
     let navigate = useNavigate();
@@ -353,6 +354,10 @@ function Profile() {
                 <h1>Outfit Log</h1>
                 <OutfitLog profileID={profile.id}/>
             </>
+            }
+
+        {profile &&
+                <Feed profileID={profile.id} />
         }
 
         {showModal && modalType !== "" && (
