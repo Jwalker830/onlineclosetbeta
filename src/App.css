@@ -771,3 +771,16 @@ input{
   justify-content: space-around;
   align-items: center;
 }
+
+.feedCellContainer {
+    width: 500px;
+    height: 500px;
+    margin: auto;
+    background-color: var(--color4);
+}
+
+.actionContainer h3 {
+    margin: auto;
+    padding: 10px;
+    font-size: 30px;
+}

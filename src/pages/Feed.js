@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db, auth } from "../firebase-config";
-import DisplayFit from "./DisplayFit";
+import FeedCell from "./FeedCell"
 
 function Feed({ isAuth, profileID }) {
     const [following, setFollowing] = useState([]);
@@ -133,17 +133,7 @@ function Feed({ isAuth, profileID }) {
             {sortedFeed.length > 0 ? (
                 <div className="feed">
                     {sortedFeed.map((actionObj, index) => {
-                        const action = actionObj.action;
-                        if (action.type === "fit") {
-                            return (
-                                <div className="actionContainer" key={index}>
-                                    <p>{actionObj.name} logged an outfit!</p>
-                                    <DisplayFit curFit={JSON.parse(action.content)} />
-                                </div>
-                            );
-                        } else {
-                            return null;
-                        }
+                        return (<FeedCell action={actionObj} index={index} />);
                     })}
                 </div>
             ) : (
