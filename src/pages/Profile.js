@@ -352,13 +352,11 @@ function Profile() {
         {profile && !curItem &&  
             <>
                 <h1>Outfit Log</h1>
-                <OutfitLog profileID={profile.id}/>
-            </>
-            }
-
-        {profile &&
+                <OutfitLog profileID={profile.id} />
+                <br></br>
                 <Feed profileID={profile.id} />
-        }
+            </>
+         }
 
         {showModal && modalType !== "" && (
             <div className="modalOverlay">

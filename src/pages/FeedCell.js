@@ -15,6 +15,7 @@ function FeedCell({ action, index }) {
                 <div className="actionContainer" key={index}>
                     <h3>{action.name} logged an outfit!</h3>
                     <DisplayFit curFit={JSON.parse(action.action.content)} />
+                    {action.action.on && <p>Outfit for {action.action.on}</p> }
                 </div>
                 :
                 <div>

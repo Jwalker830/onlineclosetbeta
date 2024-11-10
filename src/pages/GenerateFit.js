@@ -339,10 +339,10 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
             console.log('logged' + date + " " + JSON.stringify(curFit));
 
             await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-                actions: arrayUnion({ user: auth.currentUser.uid, type: "fit", content: JSON.stringify(curFit), time: moment().format('YYYY-MM-DD HH:mm:ss') })
+                actions: arrayUnion({ user: auth.currentUser.uid, type: "fit", content: JSON.stringify(curFit), time: moment().format('YYYY-MM-DD HH:mm:ss'), on: date })
             });
 
-            console.log("logged ", { type: "fit", content: JSON.stringify(curFit), time: moment().format('YYYY-MM-DD HH:mm:ss') });
+            console.log("logged ", { type: "fit", content: JSON.stringify(curFit), time: moment().format('YYYY-MM-DD HH:mm:ss'), on: date});
         } catch (error) {
             console.error('Error updating fit log:', error);
         }

@@ -105,7 +105,7 @@ function CalendarComponent({ month, id }) {
             });
 
             await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-                actions: arrayRemove({ user: auth.currentUser.uid, type: "fit", content: fitToRemove, time: moment().format('YYYY-MM-DD HH:mm:ss') })
+                actions: arrayRemove({ user: auth.currentUser.uid, type: "fit", content: fitToRemove, time: moment().format('YYYY-MM-DD HH:mm:ss'), on: day })
             });
 
             getLogs();

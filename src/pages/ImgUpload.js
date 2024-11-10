@@ -52,10 +52,12 @@ const ImgUpload = ({ addItemList }) => {
       await handleUpload(imageList[i]);
       setUploadProgress(((i + 1) / imageList.length) * 100); // Update progress
     }
+
       setIsUploading(false);
+
       console.log(procImgCodes.join(", "));
       await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-          actions: arrayUnion({ user: auth.currentUser.uid, type: "item", content: procImgCodes.join(", "), time: moment().format('YYYY-MM-DD HH:mm:ss') })
+          actions: arrayUnion({ user: auth.currentUser.uid, type: "item", content: procImgCodes, time: moment().format('YYYY-MM-DD HH:mm:ss') })
       });
   }
 
@@ -263,7 +265,7 @@ const ImgUpload = ({ addItemList }) => {
     await updateDoc(doc(db, 'users', auth.currentUser.uid), {
       items: arrayUnion({ id: code })
     });
-      procImgCodes.push(code);
+      procImgCodes.push({ code, imgURL });
     itemList.push(itemObj);
     addItemList(itemObj);
     console.log(itemList);
