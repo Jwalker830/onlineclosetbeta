@@ -8,10 +8,15 @@ import { FaSearch } from "react-icons/fa";
 function Search() {
     const [search, setSearch] = useState("");
     const [profiles, setProfiles] = useState([]);
+    const [searched, setSearched] = useState(false)
     let navigate = useNavigate();
 
     const searchProfiles = async () => {
-        if (search.trim() === "") return;
+        setSearched(false);
+        if (search.trim() === "") {
+            setProfiles([]);
+            return;
+        }
 
         try {
             const usersRef = collection(db, "users");
@@ -36,6 +41,7 @@ function Search() {
                 }))
                 .sort((a, b) => a.similarity - b.similarity);
 
+            setSearched(true);
             setProfiles(rankedProfiles);
         } catch (error) {
             console.error("Error searching profiles:", error);
@@ -74,7 +80,14 @@ function Search() {
                         </div>
                     ))
                 ) : (
-                    <p>No profiles found</p>
+                    <>
+                    {searched ?
+                        <p className="noResults">No profiles found</p>  
+                    :
+                        <>
+                        </>
+                    }
+                    </>
                 )}
             </div>
         </div>
