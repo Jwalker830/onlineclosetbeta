@@ -38,7 +38,8 @@ function App() {
           <button className="signOutBtn" onClick={signUserOut}>Log Out</button>
         </>
         }
-      </nav>
+          </nav>
+      <div className="main-content">
       <Routes>
         <Route path="/tagitems" element={<TagItems isAuth={isAuth} />} />
         <Route path="/login" element={<Login setIsAuth={setIsAuth} />} />
@@ -46,10 +47,11 @@ function App() {
         <Route path="/fits" element={<FavFits isAuth={isAuth} />} />
         <Route path="/search" element={<Search isAuth={isAuth} />} />
         <Route path="/profile" element={<Profile />} />
-              <Route path="/" element={<Closet isAuth={isAuth} />} />
-              <Route path="/feed" element={<Feed isAuth={isAuth}/> } />
-      </Routes>
-    </Router>
+        <Route path="/" element={<Closet isAuth={isAuth} />} />
+        <Route path="/feed" element={<Feed isAuth={isAuth}/> } />
+        </Routes>
+        </div>
+      </Router>
   );
 }
 

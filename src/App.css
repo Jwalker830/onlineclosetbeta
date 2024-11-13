@@ -46,42 +46,70 @@
   --color5: #E4E4E4;
 }
 
-nav{
-  margin: auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--color2);
-  text-decoration: none;
-  border: var(--color0);
+/* Styling for the navigation bar */
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 60px;
+    background-color: #333;
+    overflow-x: hidden;
+    transition: width 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+    background-color: var(--color1);
+    font-size: 0px;
 }
 
-nav a {
-  color: var(--color0);
-  text-decoration: none;
-  margin: 10px;
-  font-size: 30px;
-  font-weight: 0;
+    nav:hover {
+        width: 200px;
+        font-size: 30px;
+    }
+
+    nav a {
+        color: var(--color0);
+        text-decoration: none;
+        padding: 10px;
+        text-align: left;
+        width: 100%;
+        white-space: nowrap;
+        transition: color 0.2s;
+    }
+
+        nav a:hover {
+            background-color: #555;
+        }
+
+.signOutBtn {
+    color: var(--color0);
+    background: var(--color3);
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    width: 100%;
+    text-align: left;
+    display: none;
 }
 
-button{
-  font-family:Verdana, Geneva, Tahoma, sans-serif;
-  font-weight: 500;
-  border: none;
-  background-color: var(--color1);
-  color: var(--color0);
+nav:hover .signOutBtn {
+    display: block;
 }
 
-nav button{
-  border: none;
-  border-radius: 5px;
-  background-color: var(--color1);
-  color: var(--color0);
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  font-size: 15px;
+.signOutBtn:hover {
+    background-color: #555;
+}
+
+.main-content {
+    margin-left: 60px; /* Offset by the width of the nav */
+    padding: 20px;
+    transition: margin-left 0.3s;
+}
+
+nav:hover + .main-content {
+    margin-left: 200px; /* Adjusts content margin when nav is expanded */
 }
 
 .itemImg {
