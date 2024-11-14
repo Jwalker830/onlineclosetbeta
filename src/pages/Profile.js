@@ -3,19 +3,15 @@ import { collection, getDocs, query, where, updateDoc, doc, arrayUnion, arrayRem
 import GetUserItems from "./GetUserItems";
 import ProfileList from "./ProfileList";
 import { db, auth } from "../firebase-config";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ViewField from "./ViewField";
 import OutfitLog from "./OutfitLog";
 import Feed from "./Feed";
 
 function Profile() {
     let navigate = useNavigate();
-    const [profileID, setProfileID] = useState(() => {
-        if(localStorage.getItem("profile")){
-            return JSON.parse(localStorage.getItem("profile"));
-        }
-        return null;
-    });
+    const { profileId: paramProfileId } = useParams();
+    const [profileId, setProfileId] = useState();
     const [profile, setProfile] = useState();
     const [items, setItems] = useState([]);
     const [sortedItems, setSortedItems] = useState({
@@ -55,6 +51,10 @@ function Profile() {
     };
 
     useEffect(() => {
+        console.log("a");
+    }, []);
+
+    useEffect(() => {
         if (items.length > 0) {
             const s = sortPrefItems(items);
             setSortedItems(s);
@@ -62,28 +62,27 @@ function Profile() {
     }, [items]);
 
     useEffect(() => {
-        localStorage.removeItem("profile");
-        if(localStorage.getItem("isAuth")){
+        setProfileId(paramProfileId || auth.currentUser?.uid);
+    }, [paramProfileId]);
+
+    useEffect(() => {
+        if (auth.currentUser) {
             isFollowing();
         }
         getProfile();
-    }, [profileID])
+    }, [profileId]);
 
     const getProfile = async () => {
-        if(!profileID && localStorage.getItem("isAuth")){
-            setProfileID(auth.currentUser.uid);
-        }
+        const currentProfileId = profileId || auth.currentUser?.uid;
 
-        if (profileID) {
-            console.log(profileID);
+        if (currentProfileId) {
             try {
-                const q = query(collection(db, "users"), where("id", "==", profileID));
+                const q = query(collection(db, "users"), where("id", "==", currentProfileId));
                 const querySnapshot = await getDocs(q);
-                
+
                 if (!querySnapshot.empty) {
                     const userDoc = querySnapshot.docs[0];
                     const userData = userDoc.data();
-                    console.log(userData);
                     setFollowerList(userData.followers);
                     setFollowingList(userData.following);
                     setProfile(userData);
@@ -116,7 +115,7 @@ function Profile() {
         sorted.shoes = items.filter(item => item.type === "Shoes");
         sorted.accessories = items.filter(item => item.type === "Accessory" && item.title !== "No Accessory");
         sorted.other = items.filter(item => item.type === "");
-        sorted.flat = [            
+        sorted.flat = [
             ...sorted.hats,
             ...sorted.jackets,
             ...sorted.tops,
@@ -124,17 +123,15 @@ function Profile() {
             ...sorted.shoes,
             ...sorted.accessories,
             ...sorted.other
-        ]
-
-        console.log(items);
+        ];
 
         return sorted;
     };
 
     const renderItems = (items, title) => (
-        <div className='profileTypeContainer' >
+        <div className='profileTypeContainer'>
             <div className='profileTypeTitle'>{title}</div>
-            <div className={"typeDisplay"} style={{display: "flex", flexWrap: "wrap"}}>
+            <div className={"typeDisplay"} style={{ display: "flex", flexWrap: "wrap" }}>
                 {items.map((item) => (
                     <div className="profileItem"
                         key={item.id}
@@ -142,10 +139,10 @@ function Profile() {
                             handleViewItem(item);
                         }}
                     >
-                        <img 
-                            src={item.imgURL} 
-                            alt="Processed" 
-                            className="itemImg" 
+                        <img
+                            src={item.imgURL}
+                            alt="Processed"
+                            className="itemImg"
                         />
                     </div>
                 ))}
@@ -153,96 +150,58 @@ function Profile() {
         </div>
     );
 
-    const viewItems = () => {
-        localStorage.setItem("closetID", JSON.stringify(profileID));
-        navigate("/");
-    }
+    const viewItems = (id) => {
+        navigate(`/${id}`);
+    };
 
-    const followUser = async() => {
-        console.log("following");
-        await updateDoc(doc(db, "users", profileID), {
+    const followUser = async () => {
+        await updateDoc(doc(db, "users", profileId), {
             followers: arrayUnion(auth.currentUser.uid)
         });
         await updateDoc(doc(db, "users", auth.currentUser.uid), {
-            following: arrayUnion(profileID)
+            following: arrayUnion(profileId)
         });
-        setTimeout(() => {
-            isFollowing();
-        }, 100)
-    }
+        isFollowing();
+    };
 
-    const unfollowUser = async() => {
-        console.log("unfollowing");
-        await updateDoc(doc(db, "users", profileID), {
+    const unfollowUser = async () => {
+        await updateDoc(doc(db, "users", profileId), {
             followers: arrayRemove(auth.currentUser.uid)
         });
         await updateDoc(doc(db, "users", auth.currentUser.uid), {
-            following: arrayRemove(profileID)
+            following: arrayRemove(profileId)
         });
-        setTimeout(() => {
-            isFollowing();
-        }, 100)
-    }
+        isFollowing();
+    };
 
     const isFollowing = async () => {
         try {
-            let uFollow = false;
-            let iFollow = false;
-            const q = query(collection(db, "users"), where("id", "==", profileID));
+            const q = query(collection(db, "users"), where("id", "==", profileId));
             const querySnapshot = await getDocs(q);
-    
+
             if (querySnapshot.empty) {
                 console.error("No user document found");
                 return;
             }
-    
+
             const userDoc = querySnapshot.docs[0];
             const userData = userDoc.data();
-    
-            if(userData.following){
-                setFollowingList(userData.following);
-                if (userData.following.includes(auth.currentUser.uid)) {
-                    setFollows(true);
-                    uFollow = true;
-                } else {
-                    setFollows(false);
-                    uFollow = false;
-                }
-            }
-            if(userData.followers){
-                setFollowerList(userData.followers);
-                if (userData.followers.includes(auth.currentUser.uid)) {
-                    setFollowing(true);
-                    iFollow = true;
-                } else {
-                    setFollowing(false);
-                    iFollow = false;
-                }
-            }
 
-            if(iFollow && uFollow){
-                setFriends(true);
-            }
-            else{
-                setFriends(false);
-            }
+            setFollowingList(userData.following);
+            setFollowerList(userData.followers);
+            setFollows(userData.following.includes(auth.currentUser.uid));
+            setFollowing(userData.followers.includes(auth.currentUser.uid));
+            setFriends(userData.following.includes(auth.currentUser.uid) && userData.followers.includes(auth.currentUser.uid));
 
         } catch (error) {
             console.error("Error checking following status:", error);
             setFollowing(false);
             setFollows(false);
         }
-
-    }
-
-    useEffect(() => {
-        if(localStorage.getItem("isAuth")){
-            isFollowing();
-        }
-    }, [])
+    };
 
     const toggleModal = (type) => {
-        setModalType(type)
+        setModalType(type);
         setShowModal(true);
     };
 
@@ -252,121 +211,121 @@ function Profile() {
 
     const setNewProfileID = (id) => {
         closeModal();
-        setProfileID(id)
-    }
+        navigate(`/profile/${id}`);
+    };
 
     const handleViewItem = (item) => {
         setCurItem(item);
-    }
+    };
 
     const handleEditName = async () => {
-        if(editName){
-            const userRef = doc(db, 'users', profileID);
+        if (editName) {
+            const userRef = doc(db, 'users', profileId);
             await updateDoc(userRef, {
-              name: tempName
+                name: tempName
             });
-            setProfile({...profile, name: tempName});
+            setProfile({ ...profile, name: tempName });
             setEditName(false);
         }
-        else{
+        else {
             setEditName(true);
         }
-    }
+    };
 
     return (
         <div className="profileContainer">
-        {profile && !curItem ?
-            <>
-                <GetUserItems setItemList={updateItemList} id={profileID}/>
-                <div className="profileHeader">
-                    {auth.currentUser && profileID === auth.currentUser.uid ?
-                    <div className="namePlate">
-                        {!editName ? 
-                            <>
-                                <h1>{profile.name}</h1>
-                                <button onClick={handleEditName}>✏️</button>
-                            </>
+            {profile && !curItem ?
+                <>
+                    <GetUserItems setItemList={updateItemList} id={profileId} />
+                    <div className="profileHeader">
+                        {auth.currentUser && profileId === auth.currentUser.uid ?
+                            <div className="namePlate">
+                                {!editName ?
+                                    <>
+                                        <h1>{profile.name}</h1>
+                                        <button onClick={handleEditName}>✏️</button>
+                                    </>
+                                    :
+                                    <>
+                                        <input type="text" id="name" name="name" placeholder="Display Name..." value={tempName} onChange={(e) => setTempName(e.target.value)} />
+                                        <button onClick={handleEditName}>✔️</button>
+                                    </>
+                                }
+                            </div>
                             :
                             <>
-                                <input type="text" id="name" name="name" placeholder="Display Name..." value={tempName} onChange={(e) => setTempName(e.target.value)} />
-                                <button onClick={handleEditName}>✔️</button>
+                                <h1>{profile.name}</h1>
                             </>
                         }
-                    </div>
-                    :
-                    <>
-                        <h1>{profile.name}</h1>
-                    </>
-                    }
-                    <div className="profileFollowers profileCount" onClick={() => toggleModal("follower")}>
-                        <h2>Followers</h2>
-                        {followerList && followerList.length >= 0 ?
+                        <div className="profileFollowers profileCount" onClick={() => toggleModal("follower")}>
+                            <h2>Followers</h2>
+                            {followerList && followerList.length >= 0 ?
 
-                        <h3>{followerList.length}</h3>
-                        :
-                        <h3>0</h3>
-                    }
-                    </div>
-                    <div className="profileFollowing profileCount" onClick={() => toggleModal("following")}>
-                        <h2>Following</h2>
-                        {followingList && followingList.length >= 0 ?
-                        
-                        <h3>{followingList.length}</h3>
-                        :
-                        <h3>0</h3>
-                    }
-                    </div>
-                </div>
-                <>{(follows && !friends) && <h3>Follows you</h3>}</>
-                <>{friends && <h3>Friends</h3>}</>
-                {auth.currentUser && auth.currentUser.uid !== profileID &&
-                    <>
-                        {following !== null &&
-                            <button onClick={following ? unfollowUser : followUser}>{following ? "Unfollow" : "Follow"}</button>
-                        }
-                    </>
-                }
-                {items.length > 3 ? (
-                    <div className="closetShow">
-                        <div className="profileItemDisplay">
-                            {renderItems(sortedItems.hats, 'Hats')}
-                            {renderItems(sortedItems.jackets, 'Jackets')}
-                            {renderItems(sortedItems.tops, 'Tops')}
-                            {renderItems(sortedItems.bottoms, 'Bottoms')}
-                            {renderItems(sortedItems.shoes, 'Shoes')}
-                            {renderItems(sortedItems.accessories, 'Accessories')}
-                            {renderItems(sortedItems.other, 'Unorganized Items')}
+                                <h3>{followerList.length}</h3>
+                                :
+                                <h3>0</h3>
+                            }
                         </div>
-                        <button onClick={viewItems}>View in Closet</button>
+                        <div className="profileFollowing profileCount" onClick={() => toggleModal("following")}>
+                            <h2>Following</h2>
+                            {followingList && followingList.length >= 0 ?
+
+                                <h3>{followingList.length}</h3>
+                                :
+                                <h3>0</h3>
+                            }
+                        </div>
                     </div>
-                ) : (
-                    <div>No Items</div>
-                )}
-            </>
-            :
-            <>
-                {sortedItems.flat && curItem && profile && <ViewField item={curItem} setCurItem={updateCurItem} index={sortedItems.flat.indexOf(curItem)} itemArray={sortedItems.flat} setCurIndex={updateCurIndex} isOnMobile={onMobile}/>}
-            </>
-        }
+                    <>{(follows && !friends) && <h3>Follows you</h3>}</>
+                    <>{friends && <h3>Friends</h3>}</>
+                    {auth.currentUser && auth.currentUser.uid !== profileId &&
+                        <>
+                            {following !== null &&
+                                <button onClick={following ? unfollowUser : followUser}>{following ? "Unfollow" : "Follow"}</button>
+                            }
+                        </>
+                    }
+                    {items.length > 3 ? (
+                        <div className="closetShow">
+                            <div className="profileItemDisplay">
+                                {renderItems(sortedItems.hats, 'Hats')}
+                                {renderItems(sortedItems.jackets, 'Jackets')}
+                                {renderItems(sortedItems.tops, 'Tops')}
+                                {renderItems(sortedItems.bottoms, 'Bottoms')}
+                                {renderItems(sortedItems.shoes, 'Shoes')}
+                                {renderItems(sortedItems.accessories, 'Accessories')}
+                                {renderItems(sortedItems.other, 'Unorganized Items')}
+                            </div>
+                            <button onClick={() => { viewItems(profile.id)}}>View in Closet</button>
+                        </div>
+                    ) : (
+                        <div>No Items</div>
+                    )}
+                </>
+                :
+                <>
+                    {sortedItems.flat && curItem && profile && <ViewField item={curItem} setCurItem={updateCurItem} index={sortedItems.flat.indexOf(curItem)} itemArray={sortedItems.flat} setCurIndex={updateCurIndex} isOnMobile={onMobile} />}
+                </>
+            }
 
-        {profile && !curItem &&  
-            <>
-                <h1>Outfit Log</h1>
-                <OutfitLog profileID={profile.id} />
-                <br></br>
-                <Feed profileID={profile.id} />
-            </>
-         }
+            {profile && !curItem &&
+                <>
+                    <h1>Outfit Log</h1>
+                    <OutfitLog profileID={profile.id} />
+                    <br></br>
+                    <Feed profileID={profile.id} />
+                </>
+            }
 
-        {showModal && modalType !== "" && (
-            <div className="modalOverlay">
-                <div className="modalContent">
-                    <button className="closeModal" onClick={closeModal}>X</button>
-                    <ProfileList profiles={modalType === "follower" ? followerList : followingList} setNewProfile={setNewProfileID}/>
+            {showModal && modalType !== "" && (
+                <div className="modalOverlay">
+                    <div className="modalContent">
+                        <button className="closeModal" onClick={closeModal}>X</button>
+                        <ProfileList profiles={modalType === "follower" ? followerList : followingList} setNewProfile={setNewProfileID} />
+                    </div>
                 </div>
-            </div>
-        )}
-    </div>
+            )}
+        </div>
     );
 }
 

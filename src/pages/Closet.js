@@ -3,7 +3,7 @@ import { setDoc, doc, query, collection, where, getDocs } from "firebase/firesto
 import { db, auth, provider } from "../firebase-config";
 import { onAuthStateChanged  } from "firebase/auth";
 import ImgUpload from './ImgUpload';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import GetUserItems from "./GetUserItems";
 import GenerateFit from "./GenerateFit";
 
@@ -12,13 +12,9 @@ function Closet({ isAuth }) {
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       });
       
-    const [currentID, setCurrentID] = useState(() => {
-        if(localStorage.getItem("closetID")){
-            console.log(localStorage.getItem("closetID"));
-            return JSON.parse(localStorage.getItem("closetID"));
-        }
-        return null;
-    });
+
+    const { profileId: paramProfileId } = useParams();
+    const [currentID, setCurrentID] = useState();
     const [logging, setLogging] = useState(localStorage.getItem("logging"));
     const [date, setDate] = useState(localStorage.getItem("date"));
     const [userItems, setUserItems] = useState(null);
@@ -87,6 +83,11 @@ function Closet({ isAuth }) {
     }
 
     let navigate = useNavigate();
+
+    useEffect(() => {
+        console.log(paramProfileId);
+        setCurrentID(paramProfileId || auth.currentUser?.uid);
+    }, [paramProfileId]);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {

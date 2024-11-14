@@ -38,8 +38,7 @@ function ProfileList({ setNewProfile, profiles }) {
     }, [userObjs]);
 
     const loadProfile = (selected) => {
-        localStorage.setItem("profile", JSON.stringify(selected));
-        navigate("/profile");
+        navigate(`/profile/${selected}`);
     };
 
     return (
