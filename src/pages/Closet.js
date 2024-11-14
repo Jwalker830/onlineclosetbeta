@@ -85,8 +85,8 @@ function Closet({ isAuth }) {
     let navigate = useNavigate();
 
     useEffect(() => {
-        console.log(paramProfileId);
-        setCurrentID(paramProfileId || auth.currentUser?.uid);
+        console.log(paramProfileId)
+        setCurrentID(paramProfileId ? paramProfileId : auth.currentUser.uid);
     }, [paramProfileId]);
 
     useEffect(() => {
