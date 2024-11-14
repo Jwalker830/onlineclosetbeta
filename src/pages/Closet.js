@@ -85,19 +85,16 @@ function Closet({ isAuth }) {
     let navigate = useNavigate();
 
     useEffect(() => {
-        console.log(paramProfileId)
-        setCurrentID(paramProfileId ? paramProfileId : auth.currentUser.uid);
-    }, [paramProfileId]);
-
-    useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user && currentID === null) {
-                setCurrentID(user.uid);
+            if (user) {
+                setCurrentID(paramProfileId || user.uid);
+            } else if (!paramProfileId) {
+                navigate("/login");
             }
         });
 
         return () => unsubscribe();
-    }, [navigate]);
+    }, [paramProfileId]);
 
     useEffect(() => {
         if (!localStorage.getItem("isAuth") && !localStorage.getItem("closetID")) {
