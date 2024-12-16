@@ -9,6 +9,7 @@ const DisplayFit = ({ curFit, removeFit, width, curUser }) => {
     const [onMobile, setOnMobile] = useState(() => {
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       });
+    const [displayFitCode, setDisplayFitCode] = useState("");
       
     useEffect(() => {
         console.log(isCurUser);
@@ -51,8 +52,8 @@ const DisplayFit = ({ curFit, removeFit, width, curUser }) => {
     let navigate = useNavigate();
 
     const viewFit = () => {
-        localStorage.setItem("curFit", JSON.stringify(curFit));
-        navigate("/");
+        console.log(displayFitCode);
+        navigate("/" + displayFitCode);
     }
 
     const compFits = (fit1, fit2) => {
@@ -93,6 +94,52 @@ const DisplayFit = ({ curFit, removeFit, width, curUser }) => {
     
 
     useEffect(() => {
+        const genFitCode = async () => {
+            let fitCode = "";
+            let keys = Object.keys(curFit);
+            console.log("curFit:", curFit);
+
+            keys.forEach((key) => {
+                const item = curFit[key];
+
+                if (key === "accessories" && Array.isArray(item) && item.length > 0) {
+                    fitCode += "--";
+                    item.forEach((obj) => {
+                        if (obj.id) {
+                            if (obj.id.length < 10) {
+                                fitCode += ("0000000" + obj.id);
+                            } else {
+                                fitCode += obj.id;
+                            }
+                        } else {
+                            console.error(`Missing id in Accessories object:`, obj);
+                        }
+                    });
+                    fitCode += "--";
+                }
+                else if (key === "accessories" && Array.isArray(item) && item.length === 0){
+
+                    fitCode += "----";
+                }
+
+                if (item && item.id && key !== "accessories") {
+                    if (item.id.length < 10) {
+                        fitCode += ("0000000" + item.id);
+                    } else {
+                        fitCode += item.id;
+                    }
+                } else {
+                    console.error(`Invalid or missing 'id' for key '${key}':`, item);
+                }
+            });
+
+            setDisplayFitCode(fitCode);
+            console.log("Generated fitCode:", fitCode);
+        };
+
+
+        genFitCode();
+
         const checkIfFavorite = async () => {
             try {
                 const q = query(collection(db, "users"), where("id", "==", auth.currentUser.uid));
@@ -121,11 +168,11 @@ const DisplayFit = ({ curFit, removeFit, width, curUser }) => {
                 {curFit !== null ? (
                     <>
                         <div className={`fitContainer ${onMobile && 'mobile'}`} onClick={viewFit}>
-                            {curFit.hat && curFit.hat.id !== "001" && (
+                            {curFit.hat && curFit.hat.id !== "001" && 
                                 <div className='hatPic fitImgContainer'>
                                     <img key={curFit.hat.id} src={curFit.hat.imgURL} alt="hat" className='fitImg' style={{ zIndex: '2' }} />
                                 </div>
-                            )}
+                            }
                             {curFit.jacket && curFit.jacket.id !== "000" && (
                                 <div className='jacketPic fitImgContainer'>
                                     <img key={curFit.jacket.id} src={curFit.jacket.imgURL} alt="jacket" className='fitImg' style={{ zIndex: '1' }} />

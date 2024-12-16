@@ -34,14 +34,7 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
         shoes: [],
         accessories: [],
     });
-    const [curFit, setCurFit] = useState(() => {
-        if(passFit){
-            return passFit;
-        }
-        else{
-            return null;
-        }
-    });
+    const [curFit, setCurFit] = useState();
     const [genPrompt, setGenPrompt] = useState(null);
     const [displayedItems, setDisplayedItems] = useState([]);
     const [loading, setLoading] = useState(true); // Loading state
@@ -81,6 +74,7 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
     };
 
     useEffect(() => {
+        console.log("passed fit: ", passFit)
         setCurFit(passFit);
     }, [passFit]);
 
@@ -89,7 +83,9 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
         if (displayedItems.length > 0) {
             setLoading(false);
             console.log(displayedItems);
-            randomizeFit();
+            if (passFit == null) {
+                randomizeFit();
+            }
         }
     }, [displayedItems]);
 

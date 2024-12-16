@@ -46,6 +46,10 @@ function Closet({ isAuth }) {
             accessories: [],
         };
     });
+    const [setFitTags, fitTags] = useState();
+    const [setFitTitle, fitTitle] = useState();
+    const [setFitDesc, fitDesc] = useState();
+
 
     const clearLocked = () => {
         setLockedItems({
@@ -85,81 +89,16 @@ function Closet({ isAuth }) {
     let navigate = useNavigate();
 
     useEffect(() => {
-        if(!paramProfileId || paramProfileId.length === 28){
-            const unsubscribe = onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    setCurrentID(paramProfileId || user.uid);
-                } else if (!paramProfileId) {
-                    navigate("/login");
-                }
-            });
-
-            return () => unsubscribe();
-        }
-        else if(paramProfileId.length > 28){
-               getFitFromCode(paramProfileId);
-                const unsubscribe = onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        setCurrentID(user.uid);
-                    } else if (!paramProfileId) {
-                        navigate("/login");
-                    }
-                });
-
-                return () => unsubscribe();
-        }
-    }, [paramProfileId]);
-
-    useEffect(() => {
-        console.log("curFit: ", curFit);
-    }, [curFit])
-
-    const getFitFromCode = async (outfitID) => {
-        const outfit = {
-            hat: null,
-            jacket: null,
-            top: null,
-            bottom: null,
-            shoe: null,
-            accessories: [],
-        };
-            let cats = Object.keys(outfit);
-            for(let i = 0; i < 5; i++){
-                let curID = outfitID.substr(i * 10, 10);
-
-                if(curID === "0000000000"){
-                    curID = "000";
-                }
-                if(curID === "0000000001"){
-                    curID = "001";
-                }
-                
-                const b = query(collection(db, "clothing"), where("id", "==", curID));
-                const data = await getDocs(b);
-                data.forEach((doc) => {
-                    outfit[cats[i]] = doc.data();
-                });
-        }
-
-        let accs = outfitID.substring(52, outfitID.length - 2);
-
-        for (let i = 0; i < accs.length / 10; i++) {
-            let curID = accs.substr(i * 10, 10);
-
-            if (curID === "0000000002") {
-                curID = "002";
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setCurrentID(paramProfileId || user.uid);
+            } else if (!paramProfileId) {
+                navigate("/login");
             }
+        });
 
-            const b = query(collection(db, "clothing"), where("id", "==", curID));
-            const data = await getDocs(b);
-            data.forEach((doc) => {
-                outfit.accessories.push(doc.data());
-            });
-        }
-        
-        setCurFit(outfit)
-
-    }
+        return () => unsubscribe();
+    }, [paramProfileId]);
 
     useEffect(() => {
         if (!localStorage.getItem("isAuth") && !localStorage.getItem("closetID")) {
@@ -358,12 +297,84 @@ function Closet({ isAuth }) {
         return null;
     }
 
+    const getFitTags = () => {
+        if (curFit) {
+            let tagSet = new Set();
+            let keys = Object.keys(curFit);
+            keys.forEach((key) => {
+                item = curFit[key];
+
+                if (key === "Acessories") {
+                    item.forEach((obj) => {
+                        obj["tags"].forEach((tag) => {
+                            tagSet.add(tag);
+                        })
+                    })
+                }
+                else {
+                    item["tags"].forEach((tag) => {
+                        tagSet.add(tag);
+                    })
+                }
+            })
+        }
+
+        const tagArr = Array.from(tagSet);
+        const tags = tagArr.join(', ');
+
+        setFitTags(tags);
+        return tags;
+    }
+
+    const changeInfo = async () => {
+        try {
+            const userDoc = doc(db, 'users', auth.currentUser.uid);
+
+            await updateDoc(userDoc, {
+                fitLog: arrayUnion(date + " " + JSON.stringify(curFit))
+            });
+
+            await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+                actions: arrayUnion({ user: auth.currentUser.uid, type: "fit", content: JSON.stringify(curFit), time: moment().format('YYYY-MM-DD HH:mm:ss'), on: date })
+            });
+
+            console.log("logged ", { type: "fit", content: JSON.stringify(curFit), time: moment().format('YYYY-MM-DD HH:mm:ss'), on: date });
+        } catch (error) {
+            console.error('Error updating fit log:', error);
+        }
+    }
+
     return (
         <div>
             <GetUserItems setItemList={updateUserItems} id={currentID} />
             {sortedItems ? (
                 <div className='closetContainer'>
-                    <div className="leftCloset scroll-container">
+                    <div className="leftCloser scroll-container">
+                        <div className="input-container">
+                            <label htmlFor="title">Title:</label>
+                            <input type="text" id="title" name="title" placeholder="Enter title..." value={itemTitle} onChange={(e) => setFitTitle(e.target.value)} />
+                        </div>
+                        <div className="input-container">
+                            <label htmlFor="description">Description:</label>
+                            <textarea id="description" name="description" placeholder="Enter description..." value={itemDesc} onChange={(e) => setFitDesc(e.target.value)} />
+                        </div>
+                        <div className="input-container">
+                            <label htmlFor="tags">Tags:</label>
+                            <textarea
+                                id="tags"
+                                name="tags"
+                                placeholder="Enter tags..."
+                                value={getFitTags}
+                                onChange={(e) => setFitTags(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <button type="submit" onClick={changeInfo}>Save</button>
+                    </div>
+                    <div className="midCloset scroll-container">
+                        <GenerateFit passFit={curFit} setNewFit={loadCurFit} baseItems={lockedItems} clearLockedItems={clearLocked} id={currentID} date={date} logging={logging} />
+                    </div>
+                    <div className="rightCloset scroll-container">
                         <div className="articleDisplay scroll-container">
                             {sortedItems.hats.length > 0 ?
                                 <>
@@ -431,11 +442,6 @@ function Closet({ isAuth }) {
                                 <p>no accessories</p>
                             }
                         </div>
-                    </div>
-                    <div className="midCloset scroll-container">
-                        <GenerateFit passFit={curFit} setNewFit={loadCurFit} baseItems={lockedItems} clearLockedItems={clearLocked} id={currentID} date={date} logging={logging}/>
-                    </div>
-                    <div className="rightCloset scroll-container">
                         <div className="articleDisplay scroll-container">
                             {sortedItems.jackets.length > 0 ?
                                 <>
