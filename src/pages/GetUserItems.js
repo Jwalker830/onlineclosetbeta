@@ -6,6 +6,7 @@ const GetUserItems = ({ setItemList, id }) => {
 
     useEffect(() => {
         if (id) {
+            console.log(id);
             getItems();
         }
     }, [id]);

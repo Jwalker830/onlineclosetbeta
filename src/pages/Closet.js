@@ -6,6 +6,7 @@ import ImgUpload from './ImgUpload';
 import { useNavigate, useParams } from "react-router-dom";
 import GetUserItems from "./GetUserItems";
 import GenerateFit from "./GenerateFit";
+import DisplayFit from "./DisplayFit";
 
 function Closet({ isAuth }) {
     const [onMobile, setOnMobile] = useState(() => {
@@ -17,6 +18,7 @@ function Closet({ isAuth }) {
     const [currentID, setCurrentID] = useState();
     const [logging, setLogging] = useState(localStorage.getItem("logging"));
     const [date, setDate] = useState(localStorage.getItem("date"));
+    const [displayFit, setDisplayFit] = useState(false)
     const [userItems, setUserItems] = useState(null);
     const [sortedItems, setSortedItems] = useState(null);
     const [curFit, setCurFit] = useState(null);
@@ -85,7 +87,10 @@ function Closet({ isAuth }) {
     let navigate = useNavigate();
 
     useEffect(() => {
-        if(!paramProfileId || paramProfileId.length === 28){
+        if (!paramProfileId || paramProfileId.length === 28) {
+            if (!isAuth) {
+                setCurrentID(paramProfileId);
+            }
             const unsubscribe = onAuthStateChanged(auth, (user) => {
                 if (user) {
                     setCurrentID(paramProfileId || user.uid);
@@ -96,7 +101,10 @@ function Closet({ isAuth }) {
 
             return () => unsubscribe();
         }
-        else if(paramProfileId.length > 28){
+        else if (paramProfileId.length > 28) {
+            if (!isAuth) {
+                setDisplayFit(true);
+            }
                getFitFromCode(paramProfileId);
                 const unsubscribe = onAuthStateChanged(auth, (user) => {
                     if (user) {
@@ -109,10 +117,6 @@ function Closet({ isAuth }) {
                 return () => unsubscribe();
         }
     }, [paramProfileId]);
-
-    useEffect(() => {
-        console.log("curFit: ", curFit);
-    }, [curFit])
 
     const getFitFromCode = async (outfitID) => {
         const outfit = {
@@ -142,6 +146,7 @@ function Closet({ isAuth }) {
         }
 
         let accs = outfitID.substring(52, outfitID.length - 2);
+        console.log("accs", accs);
 
         for (let i = 0; i < accs.length / 10; i++) {
             let curID = accs.substr(i * 10, 10);
@@ -160,12 +165,6 @@ function Closet({ isAuth }) {
         setCurFit(outfit)
 
     }
-
-    useEffect(() => {
-        if (!localStorage.getItem("isAuth") && !localStorage.getItem("closetID")) {
-            navigate("/login");
-        }        
-    }, []);
 
     useEffect(() => {
         if (userItems && userItems.length > 0) {
@@ -360,7 +359,7 @@ function Closet({ isAuth }) {
 
     return (
         <div>
-            <GetUserItems setItemList={updateUserItems} id={currentID} />
+            {!displayFit && currentID && <GetUserItems setItemList={updateUserItems} id={currentID} />}
             {sortedItems ? (
                 <div className='closetContainer'>
                     <div className="leftCloset scroll-container">
@@ -502,7 +501,16 @@ function Closet({ isAuth }) {
                     </div>
                 </div>
             ) : (
-                <p>Loading...</p>
+                <>
+                        {(displayFit && curFit) ?
+                            <>
+                                <DisplayFit curFit={curFit} />
+                            </>
+                            :
+                            <p>Loading...</p>
+
+                    }
+                 </>
             )}
         </div>
     );    
