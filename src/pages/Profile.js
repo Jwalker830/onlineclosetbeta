@@ -8,7 +8,7 @@ import ViewField from "./ViewField";
 import OutfitLog from "./OutfitLog";
 import Feed from "./Feed";
 
-function Profile() {
+function Profile({ isAuth }) {
     let navigate = useNavigate();
     const { profileId: paramProfileId } = useParams();
     const [profileId, setProfileId] = useState();
@@ -66,7 +66,7 @@ function Profile() {
     }, [paramProfileId]);
 
     useEffect(() => {
-        if (profileId === auth.currentUser.uid) {
+        if (isAuth && profileId === auth.currentUser.uid) {
             navigate("/profile/" + auth.currentUser.uid);
         }
         if (auth.currentUser) {

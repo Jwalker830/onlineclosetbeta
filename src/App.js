@@ -46,8 +46,8 @@ function App() {
                     <Route path="/swipe" element={<SwipeFits />} />
                     <Route path="/fits" element={<FavFits isAuth={isAuth} />} />
                     <Route path="/search" element={<Search isAuth={isAuth} />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/profile/:profileId" element={<Profile />} />
+                    <Route path="/profile" element={<Profile isAuth={isAuth} />} />
+                    <Route path="/profile/:profileId" element={<Profile isAuth={isAuth} />} />
                     <Route path="/" element={<Closet isAuth={isAuth} />} />
                     <Route path="/:profileId" element={<Closet isAuth={isAuth} />} />
                     <Route path="/feed" element={<Feed isAuth={isAuth} />} />
