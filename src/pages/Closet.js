@@ -91,6 +91,9 @@ function Closet({ isAuth }) {
             if (!isAuth) {
                 setCurrentID(paramProfileId);
             }
+            if (!paramProfileId) {
+                navigate("/" + auth.currentUser.uid);
+            }
             const unsubscribe = onAuthStateChanged(auth, (user) => {
                 if (user) {
                     setCurrentID(paramProfileId || user.uid);

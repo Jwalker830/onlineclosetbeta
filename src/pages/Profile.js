@@ -66,6 +66,9 @@ function Profile() {
     }, [paramProfileId]);
 
     useEffect(() => {
+        if (profileId === auth.currentUser.uid) {
+            navigate("/profile/" + auth.currentUser.uid);
+        }
         if (auth.currentUser) {
             isFollowing();
         }
