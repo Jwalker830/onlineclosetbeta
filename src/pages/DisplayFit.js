@@ -97,8 +97,11 @@ const DisplayFit = ({ curFit, removeFit, width, curUser }) => {
         try {
             const genFitCode = async () => {
                 let fitCode = "";
-                let keys = Object.keys(curFit);
                 console.log("curFit:", curFit);
+                let keys = [];
+                if (curFit) {
+                    keys = Object.keys(curFit);
+                }
 
                 keys.forEach((key) => {
                     const item = curFit[key];

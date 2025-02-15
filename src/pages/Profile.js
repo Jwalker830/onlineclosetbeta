@@ -67,11 +67,13 @@ function Profile({ isAuth }) {
     }, [paramProfileId]);
 
     useEffect(() => {
-        if (isAuth && profileId === auth.currentUser.uid) {
-            navigate("/profile/" + auth.currentUser.uid);
-        }
         if (auth.currentUser) {
-            isFollowing();
+            if (isAuth && profileId === auth.currentUser.uid) {
+                navigate("/profile/" + auth.currentUser.uid);
+            }
+            if (auth.currentUser) {
+                isFollowing();
+            }
         }
         getProfile();
     }, [profileId]);
@@ -306,7 +308,7 @@ function Profile({ isAuth }) {
                         <div>No Items</div>
                     )}
 
-                    <ShowStats handleViewItem = { handleViewItem }></ShowStats>
+                    <ShowStats handleViewItem={handleViewItem} id = { profile.id }></ShowStats>
                 </>
                 :
                 <>

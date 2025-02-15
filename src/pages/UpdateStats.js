@@ -13,7 +13,7 @@ export const updateStatsLogic = async (id) => {
                 return;
             }
 
-            const q = query(collection(db, "users"), where("id", "==", auth.currentUser.uid));
+            const q = query(collection(db, "users"), where("id", "==", id));
             const querySnapshot = await getDocs(q);
             const fitSet = new Set();
             const logSet = new Set();
@@ -79,9 +79,11 @@ export const updateStatsLogic = async (id) => {
                     if (outfit[type]) {
                         // Handle accessories (array) separately
                         if (type === 'accessories') {
-                            outfit[type].forEach((accessory) => {
-                                updateItemCount(accessory, 'accessories');
-                            });
+                            if (outfit[type].length > 0) {
+                                outfit[type].forEach((accessory) => {
+                                    updateItemCount(accessory, 'accessories');
+                                });
+                            }
                         } else {
                             updateItemCount(outfit[type], type);
                         }

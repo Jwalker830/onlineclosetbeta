@@ -4,7 +4,7 @@ import { db, auth } from "../firebase-config";
 import { useNavigate } from "react-router-dom";
 import DisplayFit from "./DisplayFit";
 
-function ShowStats({ handleViewItem }) {
+function ShowStats({ handleViewItem, id }) {
     const [stats, setStats] = useState(null);
     const [ideal, setIdeal] = useState(null);
 
@@ -13,18 +13,21 @@ function ShowStats({ handleViewItem }) {
     // Fetch stats from Firestore
     const getStats = async () => {
         try {
-            if (!auth.currentUser) {
-                console.error("User is not loaded");
+            if (!id) {
+                console.error("No id");
                 return;
             }
 
-            const q = query(collection(db, "users"), where("id", "==", auth.currentUser.uid));
+            const q = query(collection(db, "users"), where("id", "==", id));
             const querySnapshot = await getDocs(q);
 
             querySnapshot.forEach((userDoc) => {
                 const userData = userDoc.data();
                 if (userData.wearStats) {
                     setStats(JSON.parse(userData.wearStats)); // Parse the stats string into an object
+                }
+                else {
+                    setStats("none");
                 }
             });
         } catch (error) {
@@ -90,8 +93,11 @@ function ShowStats({ handleViewItem }) {
     };
 
     useEffect(() => {
-        getStats(); // Fetch stats when the component mounts
-    }, []);
+        if (id) {
+            console.log("Getting stats for: ", id)
+            getStats(); // Fetch stats when the component mounts
+        }
+    }, [id]);
 
     useEffect(() => {
         if (stats) {
@@ -103,43 +109,51 @@ function ShowStats({ handleViewItem }) {
         <div>
             <h1>Favorite Items</h1>
             {stats ? (
-                <div>
-                    {Object.keys(stats).map((category) => (
-                        <div key={category}>
-                            <h2>{category}</h2>
-                            <ul style={{ listStyle: "none", padding: 0, display: "flex", gap: "20px" }}>
-                                {stats[category]
-                                    .sort((a, b) => b[1] - a[1]) // Sort by count in descending order
-                                    .slice(0, 3) // Take the top 3 items
-                                    .map(([itemData, count], index) => (
-                                        <li key={index} style={{ textAlign: "center" }}>
-                                            {itemData && itemData.imgURL ? (
-                                                <img
-                                                    src={itemData.imgURL}
-                                                    alt={itemData.title}
-                                                    style={{ width: "100px", borderRadius: "10px" }}
-                                                    onClick={() => {
-                                                        handleViewItem(itemData);
-                                                    }}
-                                                />
-                                            ) : (
-                                                <div style={{ width: "100px", height: "100px", backgroundColor: "#ccc", borderRadius: "10px" }}>
-                                                    No Image
-                                                </div>
-                                            )}
-                                            <p>
-                                                <strong>{itemData ? itemData.title : "Unknown Item"}</strong>
-                                                <br />
-                                                {count} Logs
-                                            </p>
-                                        </li>
-                                    ))}
-                            </ul>
-                        </div>
-                    ))}
-                    <h1>Top Items Fit</h1>
-                    <DisplayFit curFit={ ideal }></DisplayFit>
-                </div>
+                <>
+                    {stats !== "none" ? (
+                        < div >
+                    {
+                        Object.keys(stats).map((category) => (
+                            <div key={category}>
+                                <h2>{category}</h2>
+                                <ul style={{ listStyle: "none", padding: 0, display: "flex", gap: "20px" }}>
+                                    {stats[category]
+                                        .sort((a, b) => b[1] - a[1]) // Sort by count in descending order
+                                        .slice(0, 3) // Take the top 3 items
+                                        .map(([itemData, count], index) => (
+                                            <li key={index} style={{ textAlign: "center" }}>
+                                                {itemData && itemData.imgURL ? (
+                                                    <img
+                                                        src={itemData.imgURL}
+                                                        alt={itemData.title}
+                                                        style={{ width: "100px", borderRadius: "10px" }}
+                                                        onClick={() => {
+                                                            handleViewItem(itemData);
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div style={{ width: "100px", height: "100px", backgroundColor: "#ccc", borderRadius: "10px" }}>
+                                                        No Image
+                                                    </div>
+                                                )}
+                                                <p>
+                                                    <strong>{itemData ? itemData.title : "Unknown Item"}</strong>
+                                                    <br />
+                                                    {count} Logs
+                                                </p>
+                                            </li>
+                                        ))}
+                                </ul>
+                            </div>
+                        ))
+                    }
+                        < h1 > Top Items Fit</h1>
+            <DisplayFit curFit={ideal}></DisplayFit>
+        </div>
+                    ) : (
+                    <p>Favorite/Log more outfits!</p>
+                )} 
+                </>
             ) : (
                 <p>Loading stats...</p>
             )}
