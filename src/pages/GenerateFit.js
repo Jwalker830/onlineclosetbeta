@@ -7,6 +7,7 @@ import GetUserItems from "./GetUserItems";
 import GetPrefItems from './GetPrefItems';
 import GetUserPrefs from './GetUserPrefs';
 import DisplayFit from "./DisplayFit";
+import { updateStatsLogic } from './UpdateStats';
 import moment from 'moment';
 
 function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, id, logging, date }) {
@@ -339,6 +340,9 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
             });
 
             console.log("logged ", { type: "fit", content: JSON.stringify(curFit), time: moment().format('YYYY-MM-DD HH:mm:ss'), on: date});
+
+            const stats = await updateStatsLogic(id);
+            console.log("Updated Stats:", stats);
         } catch (error) {
             console.error('Error updating fit log:', error);
         }

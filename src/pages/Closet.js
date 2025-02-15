@@ -7,6 +7,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import GetUserItems from "./GetUserItems";
 import GenerateFit from "./GenerateFit";
 import DisplayFit from "./DisplayFit";
+import GetUserData from "./GetUserData";
 
 function Closet({ isAuth }) {
     const [onMobile, setOnMobile] = useState(() => {
@@ -360,10 +361,21 @@ function Closet({ isAuth }) {
         return null;
     }
 
+    const goProfile = async () => {
+        if (currentID) {
+            navigate(`/profile/${currentID}`)
+        }
+        else {
+            navigate(`/profile/${curFit.top.owner}`)
+        }
+    }
+
     return (
         <div>
             {!displayFit && currentID && <GetUserItems setItemList={updateUserItems} id={currentID} />}
             {sortedItems ? (
+                <>
+                <button onClick={() => { goProfile() }}>View Profile</button>
                 <div className='closetContainer'>
                     <div className="leftCloset scroll-container">
                         <div className="articleDisplay scroll-container">
@@ -502,11 +514,13 @@ function Closet({ isAuth }) {
                             }
                         </div>
                     </div>
-                </div>
+                    </div>
+                </>
             ) : (
                 <>
                         {(displayFit && curFit) ?
                             <>
+                                <button onClick={() => { goProfile() }}>View Profile</button>
                                 <DisplayFit curFit={curFit} />
                             </>
                             :

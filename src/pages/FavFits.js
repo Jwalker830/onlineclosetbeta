@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from "../firebase-config";
 import { query, collection, where, getDocs } from "firebase/firestore";
+import { updateStatsLogic } from './UpdateStats';
 import DisplayFit from './DisplayFit';
 
 const FavFits = ({ isAuth }) => {
@@ -21,7 +22,9 @@ const FavFits = ({ isAuth }) => {
                 console.error("User is not loaded");
                 return;
             }
-    
+
+            updateStatsLogic(auth.currentUser.uid);
+
             const q = query(collection(db, "users"), where("id", "==", auth.currentUser.uid));
             const querySnapshot = await getDocs(q);
             const fitSet = new Set();

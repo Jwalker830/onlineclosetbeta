@@ -94,73 +94,78 @@ const DisplayFit = ({ curFit, removeFit, width, curUser }) => {
     
 
     useEffect(() => {
-        const genFitCode = async () => {
-            let fitCode = "";
-            let keys = Object.keys(curFit);
-            console.log("curFit:", curFit);
+        try {
+            const genFitCode = async () => {
+                let fitCode = "";
+                let keys = Object.keys(curFit);
+                console.log("curFit:", curFit);
 
-            keys.forEach((key) => {
-                const item = curFit[key];
+                keys.forEach((key) => {
+                    const item = curFit[key];
 
-                if (key === "accessories" && Array.isArray(item) && item.length > 0) {
-                    fitCode += "--";
-                    item.forEach((obj) => {
-                        if (obj.id) {
-                            if (obj.id.length < 10) {
-                                fitCode += ("0000000" + obj.id);
+                    if (key === "accessories" && Array.isArray(item) && item.length > 0) {
+                        fitCode += "--";
+                        item.forEach((obj) => {
+                            if (obj.id) {
+                                if (obj.id.length < 10) {
+                                    fitCode += ("0000000" + obj.id);
+                                } else {
+                                    fitCode += obj.id;
+                                }
                             } else {
-                                fitCode += obj.id;
+                                console.error(`Missing id in Accessories object:`, obj);
                             }
-                        } else {
-                            console.error(`Missing id in Accessories object:`, obj);
-                        }
-                    });
-                    fitCode += "--";
-                }
-                else if (key === "accessories" && Array.isArray(item) && item.length === 0){
-
-                    fitCode += "----";
-                }
-
-                if (item && item.id && key !== "accessories") {
-                    if (item.id.length < 10) {
-                        fitCode += ("0000000" + item.id);
-                    } else {
-                        fitCode += item.id;
+                        });
+                        fitCode += "--";
                     }
-                } else {
-                    console.error(`Invalid or missing 'id' for key '${key}':`, item);
-                }
-            });
+                    else if (key === "accessories" && Array.isArray(item) && item.length === 0) {
 
-            setDisplayFitCode(fitCode);
-            console.log("Generated fitCode:", fitCode);
-        };
+                        fitCode += "----";
+                    }
 
-
-        genFitCode();
-
-        const checkIfFavorite = async () => {
-            try {
-                const q = query(collection(db, "users"), where("id", "==", auth.currentUser.uid));
-                const querySnapshot = await getDocs(q);
-                let favorite = false;
-                querySnapshot.forEach((doc) => {
-                    const favFits = doc.data().favFits || [];
-                    favFits.forEach((fit) => {
-                        if (compFits(fit, curFit)) {
-                            favorite = true;
+                    if (item && item.id && key !== "accessories") {
+                        if (item.id.length < 10) {
+                            fitCode += ("0000000" + item.id);
+                        } else {
+                            fitCode += item.id;
                         }
-                    });
+                    } else {
+                        console.error(`Invalid or missing 'id' for key '${key}':`, item);
+                    }
                 });
-                setIsFav(favorite);
-            } catch (error) {
-                console.error("Error checking favorite status: ", error);
-            }
-        };
 
-        // Only call checkIfFavorite if curFit changes
-        checkIfFavorite();
+                setDisplayFitCode(fitCode);
+                console.log("Generated fitCode:", fitCode);
+            };
+
+
+            genFitCode();
+
+            const checkIfFavorite = async () => {
+                try {
+                    const q = query(collection(db, "users"), where("id", "==", auth.currentUser.uid));
+                    const querySnapshot = await getDocs(q);
+                    let favorite = false;
+                    querySnapshot.forEach((doc) => {
+                        const favFits = doc.data().favFits || [];
+                        favFits.forEach((fit) => {
+                            if (compFits(fit, curFit)) {
+                                favorite = true;
+                            }
+                        });
+                    });
+                    setIsFav(favorite);
+                } catch (error) {
+                    console.error("Error checking favorite status: ", error);
+                }
+            };
+
+            // Only call checkIfFavorite if curFit changes
+            checkIfFavorite();
+        }
+        catch (error) {
+            console.log(error);
+        }
     }, [curFit]);
 
     return (

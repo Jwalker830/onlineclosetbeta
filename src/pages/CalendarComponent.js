@@ -5,11 +5,10 @@ import { query, collection, where, getDocs, getDoc, updateDoc, doc, arrayRemove 
 import DisplayFit from './DisplayFit';
 import moment from 'moment';
 
-function CalendarComponent({ month, id }) {
-    const year = new Date().getFullYear();
+function CalendarComponent({ year, month, id }) {
     const daysInMonth = new Date(year, month, 0).getDate();
-    const firstDayOfMonth = new Date(year, month - 1, 1).getDay(); // Sunday is 0, Saturday is 6
-    const totalCells = 42; // 6 rows of 7 days
+    const firstDayOfMonth = new Date(year, month - 1, 1).getDay();
+    const totalCells = 42;
     const [fitLog, setFitLog] = useState([]);
     const [curID, setCurID] = useState();
     let navigate = useNavigate();

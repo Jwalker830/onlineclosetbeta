@@ -13,6 +13,7 @@ function OutfitLog({ profileID }) {
     });
     const [curProf, setCurProf] = useState()
     const [month, setMonth] = useState();
+    const [year, setYear] = useState(new Date().getFullYear());
     let navigate = useNavigate();
 
     useEffect(() => {
@@ -20,8 +21,16 @@ function OutfitLog({ profileID }) {
     }, [profileID])
 
     useEffect(() => {
+        if (monthInd < 0) {
+            setMonthInd(11)
+            setYear(year - 1);
+        }
+        if (monthInd > 11) {
+            setMonthInd(0);
+            setYear(year + 1);
+        }
         setMonth(monthNames[monthInd]);
-        console.log(profileID);
+        console.log(monthInd, year);
     }, [monthInd])
 
     const handleMonthChange = (change) => {
@@ -32,10 +41,10 @@ function OutfitLog({ profileID }) {
         <div className="outfitLogContainer">
             <div className="monthHeader">
                 <h2 onClick={() => {handleMonthChange(-1)}}>◀</h2>
-                <h1>{month}</h1>
+                <h1>{month + " " + year}</h1>
                 <h2 onClick={() => {handleMonthChange(1)}}>▶</h2>
             </div>
-            {curProf && <CalendarComponent month={monthInd + 1} id={curProf}/>}
+            {curProf && <CalendarComponent year={year} month={monthInd + 1} id={curProf}/>}
             
         </div>
     );

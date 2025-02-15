@@ -7,6 +7,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import ViewField from "./ViewField";
 import OutfitLog from "./OutfitLog";
 import Feed from "./Feed";
+import ShowStats from "./ShowStats";
 
 function Profile({ isAuth }) {
     let navigate = useNavigate();
@@ -304,6 +305,8 @@ function Profile({ isAuth }) {
                     ) : (
                         <div>No Items</div>
                     )}
+
+                    <ShowStats handleViewItem = { handleViewItem }></ShowStats>
                 </>
                 :
                 <>
