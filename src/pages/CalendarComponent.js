@@ -60,7 +60,7 @@ function CalendarComponent({ year, month, id }) {
     const handleLogButton = (day) => {
         let curDate = new Date(year, month - 1, day);
         localStorage.setItem("logging", true);
-        localStorage.setItem("date", curDate);
+        localStorage.setItem("date", curDate.toDateString());
         navigate("/");
     };
 

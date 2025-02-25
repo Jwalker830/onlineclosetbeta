@@ -191,7 +191,7 @@ button[type="submit"] {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 250px;
+  width: 100%;
 }
 
 .mobile{
@@ -379,6 +379,11 @@ input{
   width: 33%;
   overflow: scroll;
   max-height: 100%;
+}
+
+.midCloset .fitContainerWStar {
+    width: 200px;
+    margin: auto;
 }
 
 .rightCloset{
@@ -817,11 +822,50 @@ input{
     width: 500px;
     height: 500px;
     margin: auto;
+    margin-bottom: 50px;
     background-color: var(--color4);
 }
 
-.actionContainer h3 {
+.actionContainer {
+    height: 80%;
+    overflow: scroll;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.container::-webkit-scrollbar {
+    display: none;
+}
+
+
+.feedCellContainer h3 {
     margin: auto;
     padding: 10px;
     font-size: 30px;
+}
+
+.feedCellContainer p {
+    margin: auto;
+    padding: 10px;
+    font-size: 12px;
+}
+
+.actionContainer .fitContainerWStar {
+    margin-top: 30px;
+    width: 150px;
+    margin: auto;
+}
+
+.profileStatsContainer {
+    margin-top: 40px;
+}
+
+.profileStatsContainer .fitContainerWStar {
+    width: 200px;
+    margin: auto;
+}
+
+.profileStatsContainer h1 {
+    text-align: center;
+    margin: auto;
 }

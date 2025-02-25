@@ -106,7 +106,7 @@ function ShowStats({ handleViewItem, id }) {
     }, [stats]);
 
     return (
-        <div>
+        <div className = "profileStatsContainer">
             <h1>Favorite Items</h1>
             {stats ? (
                 <>
@@ -147,7 +147,7 @@ function ShowStats({ handleViewItem, id }) {
                             </div>
                         ))
                     }
-                        < h1 > Top Items Fit</h1>
+                            < h1 > Top Items Fit</h1>
             <DisplayFit curFit={ideal}></DisplayFit>
         </div>
                     ) : (

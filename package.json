@@ -2,7 +2,7 @@
   "name": "closet",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://jwalker830.github.io/onlineclosetbeta",
+  "homepage": "https://www.theonlinecloset.com",
   "dependencies": {
     "@google-cloud/vision": "^4.3.2",
     "@tensorflow-models/body-pix": "^2.2.1",

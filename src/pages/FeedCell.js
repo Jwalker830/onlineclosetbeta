@@ -5,18 +5,18 @@ import { useNavigate } from "react-router-dom";
 import DisplayFit from "./DisplayFit";
 
 function FeedCell({ action, index }) {
-    console.log("FeedCell: ", action.action.type);
 
     return (
         <div className="feedCellContainer">
 
             {action.action.type === "fit" ?
-
+            <>
+                <h3>{action.name} logged an outfit!</h3>
                 <div className="actionContainer" key={index}>
-                    <h3>{action.name} logged an outfit!</h3>
                     <DisplayFit curFit={JSON.parse(action.action.content)} />
-                    {action.action.on && <p>Outfit for {action.action.on}</p> }
                 </div>
+                {action.action.on && <p>Outfit for {action.action.on}</p>}
+            </>
                 :
                 <div>
                     <h3>{action.name} added an item!</h3>

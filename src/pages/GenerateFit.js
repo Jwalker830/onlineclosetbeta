@@ -343,6 +343,7 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
 
             const stats = await updateStatsLogic(id);
             console.log("Updated Stats:", stats);
+            navigate("/profile/" + id);
         } catch (error) {
             console.error('Error updating fit log:', error);
         }
