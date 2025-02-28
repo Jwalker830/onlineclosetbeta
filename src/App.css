@@ -869,3 +869,8 @@ input{
     text-align: center;
     margin: auto;
 }
+
+.swipeFitContainer .fitContainerWStar {
+    width: 200px;
+    margin: auto;
+}
