@@ -23,7 +23,7 @@ function Closet({ isAuth }) {
     const [userItems, setUserItems] = useState(null);
     const [sortedItems, setSortedItems] = useState(null);
     const [curFit, setCurFit] = useState(null);
-    const [hoveredItem, setHoveredItem] = useState(null); // State to track hovered item
+    const [hoveredItem, setHoveredItem] = useState(null);
     const [lockedItems, setLockedItems] = useState(() => {
         if(localStorage.getItem("curFit")){
             let c = JSON.parse(localStorage.getItem("curFit"));
@@ -88,35 +88,31 @@ function Closet({ isAuth }) {
     let navigate = useNavigate();
 
     useEffect(() => {
-        if (!paramProfileId || paramProfileId.length === 28) {
-            const unsubscribe = onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    // User is signed in, set the currentID
-                    setCurrentID(paramProfileId || user.uid);
-
-                    // Redirect to the user's profile if no paramProfileId is provided
-                    if (!paramProfileId) {
-                        navigate("/" + user.uid);
-                    }
-                } else if (!paramProfileId) {
-                    // User is not signed in, redirect to login
-                    navigate("/login");
-                }
-            });
-
-            // Cleanup the observer on component unmount
-            return () => unsubscribe();
-        } else if (paramProfileId.length > 28) {
-            // Handle the case where paramProfileId is a fit code
-            if (!isAuth) {
-                setDisplayFit(true);
+        if (paramProfileId) {
+            if (paramProfileId.length === 28) {
+                setCurrentID(paramProfileId);
             }
-            getFitFromCode(paramProfileId);
+
+            if (paramProfileId.length > 28) {
+                if (!isAuth) {
+                    setDisplayFit(true);
+                }
+                getFitFromCode(paramProfileId);
+            }
 
             const unsubscribe = onAuthStateChanged(auth, (user) => {
                 if (user) {
                     setCurrentID(user.uid);
-                } else if (!paramProfileId) {
+                }
+            });
+
+            return () => unsubscribe();
+        } else {
+            const unsubscribe = onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    setCurrentID(user.uid);
+                    navigate("/" + user.uid);
+                } else {
                     navigate("/login");
                 }
             });
@@ -124,6 +120,7 @@ function Closet({ isAuth }) {
             return () => unsubscribe();
         }
     }, [paramProfileId, isAuth, navigate]);
+
 
     const getFitFromCode = async (outfitID) => {
         const outfit = {
