@@ -1,70 +1,83 @@
-# Getting Started with Create React App
+# How to use theOnlineCloset
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 1. Create an account
 
-## Available Scripts
+    a. Click the Login Button and set up an account using your
+       google email.
 
-In the project directory, you can run:
+## 2. Add items
 
-### `npm start`
+    a. Take a picture of your item and click, “Click to upload a
+       garment” to select which garments you want uploaded.
+          i. Make sure your clothes are well lit, and the picture
+             has a contrasting background in order for the
+             background to be properly removed.
+          ii. You must add at least 1 top, bottom, and shoe in
+             order to access the closet
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+    b. Be sure to add a lot of clothes, the more the merrier!
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+    c. Each item must have at least a title and some tags
+       i. Titles don’t have to be specific but other users will be
+          able to see them.
+       ii. Tags are important, make sure your tagging
+       conventions are consistent across items for best
+       results. ex: “gray” vs “grey” vs “Gray”. Each separate
+       tag should be separated by a comma.
+       iii. Your algorithm will be more effective the more
+       granular your tags are. Be as descriptive as you like.
 
-### `npm test`
+## 3. Develop your Algorithm
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+    a. Click on Score random outfits
+       i. Each outfit will be rated 1-4. Pressing arrow key (or
+          swiping on mobile) Right, Up, Down, and Left will give
+          the outfit a score of 4, 3, 2, and 1, respectively.
+       ii. The more scoring you do, the better refined your
+       algorithm will be!
 
-### `npm run build`
+## 4. Start creating outfits!
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+    a. When your algorithm is refined, the closet will automatically
+    give you a curated outfit.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+    b. To save an outfit, click the star next to the displayed outfit.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+    c. To share a closet, share the current link.
+       i. To share an outfit, click on the outfit, then share the
+       current link
 
-### `npm run eject`
+    d. Click the lock on a hovered item to lock in an item and
+    curate outfits based on that item.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+    e. Add tag names or prompts into the text bar and press enter
+    in order to curate items based on those tags. You can add
+    several tags separated by commas in order to refine your
+    curation. ex: “black, streetwear”
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 5. Log an outfit
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+    a. Go to your profile and scroll down to your fit log. Hover on
+       desktop or tap on mobile and then click log outfit in order to
+       log an outfit for that day.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+    b. You'll be taken to the closet to create your outfit. Once
+       completed, click “Log outfit” to log an outfit for that day.
 
-## Learn More
+## 6. Be social!   
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+    a. Click on the search tab to look up other users. My account
+       is “jtennma” if you want to view my account.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+    b. You can follow other accounts in order to have their logs
+       show up on your feed.
 
-### Code Splitting
+    c. You’ll be able to access others’ closets and create outfits in
+       their closets for fun.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+    d. Share outfits/profiles with your friends
 
-### Analyzing the Bundle Size
+    e. You can view others’ wear/log statistics on people's
+       profiles.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)

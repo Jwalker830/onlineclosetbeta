@@ -58,10 +58,23 @@ nav {
     transition: width 0.3s;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     align-items: center;
     padding-top: 20px;
     background-color: var(--color1);
     font-size: 0px;
+}
+.nav-top{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-bottom {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 50px;
 }
 
     nav:hover {
@@ -80,7 +93,7 @@ nav {
     }
 
         nav a:hover {
-            background-color: #555;
+            background-color: var(--color2);
         }
 
 .signOutBtn {
