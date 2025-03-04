@@ -76,7 +76,7 @@ function CalendarComponent({ year, month, id }) {
                 return;
             }
 
-            const fitDate = new Date(year, month - 1, day).toString();
+            const fitDate = new Date(year, month - 1, day).toDateString();
 
             const userDocRef = doc(db, "users", curID);
             const userDocSnapshot = await getDoc(userDocRef);
