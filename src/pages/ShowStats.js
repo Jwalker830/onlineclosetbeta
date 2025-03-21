@@ -148,7 +148,7 @@ function ShowStats({ handleViewItem, id }) {
                         ))
                     }
                             < h1 > Top Items Fit</h1>
-            <DisplayFit curFit={ideal}></DisplayFit>
+            <DisplayFit fit={ideal}></DisplayFit>
         </div>
                     ) : (
                     <p>Favorite/Log more outfits!</p>

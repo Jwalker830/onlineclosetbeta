@@ -415,7 +415,7 @@ const SwipeFits = ({ isAuth }) => {
                 }}>
                 {curFit &&
                     <>
-                        <DisplayFit curFit={curFit} removeFit={handleRemoveFit} width={"150px"} curUser={true}/>
+                        <DisplayFit fit={curFit} removeFit={handleRemoveFit} width={"150px"} curUser={true}/>
                     </>
                 }
             </div>

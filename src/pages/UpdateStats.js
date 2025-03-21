@@ -6,6 +6,54 @@ export const updateStatsLogic = async (id) => {
     let favs = [];
     let logs = [];
 
+    const getFitFromCode = async (outfitID) => {
+        const outfit = {
+            hat: null,
+            jacket: null,
+            top: null,
+            bottom: null,
+            shoe: null,
+            accessories: [],
+        };
+        let cats = Object.keys(outfit);
+        for (let i = 0; i < 5; i++) {
+            let curID = outfitID.substr(i * 10, 10);
+
+            if (curID === "0000000000") {
+                curID = "000";
+            }
+            if (curID === "0000000001") {
+                curID = "001";
+            }
+
+            const b = query(collection(db, "clothing"), where("id", "==", curID));
+            const data = await getDocs(b);
+            data.forEach((doc) => {
+                outfit[cats[i]] = doc.data();
+            });
+        }
+
+        let accs = outfitID.substring(52, outfitID.length - 2);
+        console.log("accs", accs);
+
+        for (let i = 0; i < accs.length / 10; i++) {
+            let curID = accs.substr(i * 10, 10);
+
+            if (curID === "0000000002") {
+                curID = "002";
+            }
+
+            const b = query(collection(db, "clothing"), where("id", "==", curID));
+            const data = await getDocs(b);
+            data.forEach((doc) => {
+                outfit.accessories.push(doc.data());
+            });
+        }
+
+        return (outfit);
+
+    }
+
     const getItems = async () => {
         try {
             if (!auth.currentUser) {
@@ -24,36 +72,29 @@ export const updateStatsLogic = async (id) => {
                 // Process favFits
                 await Promise.all(userData.favFits.map(async (fit) => {
                     try {
-                        const parsedAccessories = JSON.parse(fit.accessories || '[]');
-                        const realFit = {
-                            hat: fit.hat,
-                            jacket: fit.jacket,
-                            top: fit.top,
-                            bottom: fit.bottom,
-                            shoe: fit.shoe,
-                            accessories: parsedAccessories,
-                        };
-                        fitSet.add(realFit);
+                        fitSet.add(await getFitFromCode(fit));
                     } catch (error) {
                         console.error('Error parsing accessories:', error);
                     }
                 }));
                 favs = Array.from(fitSet);
+            }));
 
-                // Process fitLog
-                await Promise.all(userData.fitLog.map(async (fit) => {
+            const b = query(collection(db, "feed"), where("user", "==", id));
+            const buerySnapshot = await getDocs(b);
+
+            await Promise.all(buerySnapshot.docs.map(async (logDoc) => {
+                const logData = logDoc.data();
+
+                // Process favFits
+                await Promise.all(logData.map(async (log) => {
                     try {
-                        let parsedFit = JSON.parse(fit.slice(fit.indexOf('{')));
-                        const date = fit.slice(0, fit.indexOf('{'));
-                        logSet.add({
-                            date: new Date(date),
-                            ...parsedFit
-                        });
+                        logSet.add(await getFitFromCode(log.fitCode));
                     } catch (error) {
-                        console.error('Error parsing fitLog:', error);
+                        console.error('Error parsing accessories:', error);
                     }
                 }));
-                logs = Array.from(logSet);
+                favs = Array.from(fitSet);
             }));
         } catch (error) {
             console.error("Error fetching items:", error);

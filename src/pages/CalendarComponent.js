@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { db, auth } from "../firebase-config";
-import { query, collection, where, getDocs, getDoc, updateDoc, doc, arrayRemove } from "firebase/firestore";
+import { query, collection, where, getDocs, getDoc, updateDoc, doc, arrayRemove,setDoc } from "firebase/firestore";
 import DisplayFit from './DisplayFit';
 import moment from 'moment';
 
@@ -28,24 +28,17 @@ function CalendarComponent({ year, month, id }) {
                 return;
             }
 
-            const q = query(collection(db, "users"), where("id", "==", curID));
+            const q = query(collection(db, "feed"), where("user", "==", curID));
             const querySnapshot = await getDocs(q);
             const fitSet = new Set();
 
-            await Promise.all(querySnapshot.docs.map(async (userDoc) => {
-                const userData = userDoc.data();
-                await Promise.all(userData.fitLog.map(async (fit) => {
-                    try {
-                        let parsedFit = JSON.parse(fit.slice(fit.indexOf('{')));
-                        const date = fit.slice(0, fit.indexOf('{'));
-                        fitSet.add({
-                            date: new Date(date),
-                            ...parsedFit
-                        });
-                    } catch (error) {
-                        console.error('Error parsing accessories:', error);
-                    }
-                }));
+            await Promise.all(querySnapshot.docs.map(async (logDoc) => {
+                const logData = logDoc.data();
+                try {
+                    fitSet.add(logData);
+                } catch (error) {
+                    console.error('Error adding fits:', error);
+                }
             }));
             setFitLog(Array.from(fitSet));
         } catch (error) {
@@ -66,7 +59,7 @@ function CalendarComponent({ year, month, id }) {
 
     const getFitForDay = (day) => {
         const checkDate = new Date(year, month - 1, day).toDateString();
-        return fitLog.find(fit => new Date(fit.date).toDateString() === checkDate);
+        return fitLog.find(fit => new Date(fit.loggedFor).toDateString() === checkDate);
     };
 
     const handleRemoveLog = async (day) => {
@@ -76,44 +69,32 @@ function CalendarComponent({ year, month, id }) {
                 return;
             }
 
-            const fitDate = new Date(year, month - 1, day).toDateString();
+            const q = query(
+                collection(db, "feed"),
+                where("loggedFor", "==", day),
+                where("userID", "==", curID)
+            );
 
-            const userDocRef = doc(db, "users", curID);
-            const userDocSnapshot = await getDoc(userDocRef);
+            const querySnapshot = await getDocs(q);
 
-            if (!userDocSnapshot.exists()) {
-                console.error("User document does not exist");
+            if (querySnapshot.empty) {
+                console.log("No logs found for the specified day and user.");
                 return;
             }
 
-            const userData = userDocSnapshot.data();
-            const fitLog = userData.fitLog || [];
-
-            const fitToRemove = fitLog.find(fit => {
-                const [storedDate, jsonFit] = fit.split('{', 2);
-                return storedDate.trim() === fitDate;
+            const batch = db.batch();
+            querySnapshot.forEach((doc) => {
+                batch.delete(doc.ref);
             });
 
-            if (!fitToRemove) {
-                console.error("Fit not found for the given day");
-                return;
-            }
-
-            await updateDoc(userDocRef, {
-                fitLog: arrayRemove(fitToRemove)
-            });
-
-            await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-                actions: arrayRemove({ user: auth.currentUser.uid, type: "fit", content: fitToRemove, time: moment().format('YYYY-MM-DD HH:mm:ss'), on: day })
-            });
-
-            getLogs();
+            await batch.commit();
 
             console.log("Fit removed successfully");
         } catch (error) {
             console.error("Error removing fit:", error);
         }
     };
+
 
     return (
         <div className="calendarContainer">
@@ -126,7 +107,7 @@ function CalendarComponent({ year, month, id }) {
                         <div className="dayNumber">{day > 0 && day <= daysInMonth ? day : ""}</div>
                         {fit && day > 0 && day <= daysInMonth ? (
                             <>
-                                <DisplayFit curFit={fit} />
+                                <DisplayFit fitCode={fit.fitCode} />
                                 {auth.currentUser && curID === auth.currentUser.uid &&
                                     <button
                                         className="logButton"

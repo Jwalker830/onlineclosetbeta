@@ -17,64 +17,54 @@ function Feed({ isAuth, profileID }) {
                 return;
             }
 
-            // Get the current user's data
-            const q = query(collection(db, "users"), where("id", "==", auth.currentUser.uid));
+            // Get the current user's actions
+            const q = query(collection(db, "feed"), where("user", "==", auth.currentUser.uid));
             const querySnapshot = await getDocs(q);
 
-            if (querySnapshot.empty) {
-                console.error("No user document found");
+            let userActions = querySnapshot.docs.map((action) => ({
+                ...action.data()
+            }));
+
+            const usersRef = collection(db, "users");
+
+            // Get the following list for the current user
+            const b = query(usersRef, where("id", "==", auth.currentUser.uid));
+            const buerySnapshot = await getDocs(b);
+
+            if (buerySnapshot.empty) {
+                console.error("No following list found for the current user.");
                 return;
             }
 
-            const userDoc = querySnapshot.docs[0];
-            const userData = userDoc.data();
+            const userData = buerySnapshot.docs[0].data();
+            const followingList = userData.following || [];
 
-            // Collect the user's own actions
-            let userActions = [];
-            if (userData.actions) {
-                userActions = userData.actions.map((action) => ({
-                    action,
-                    name: userData.name
-                }));
+            if (followingList.length === 0) {
+                setFeed(userActions);
+                setChecked(true);
+                return;
             }
 
-            // Fetch actions from users in the 'following' list
-            const followingList = userData.following || [];
-            const usersRef = collection(db, "users");
+            // Fetch actions from all followed users in a single query using 'in'
+            const followActionsQuery = query(collection(db, "feed"), where("user", "in", followingList));
+            const followActionsSnapshot = await getDocs(followActionsQuery);
 
-            const promises = followingList.map(async (profileID) => {
-                const q = query(usersRef, where("id", "==", profileID));
-                const querySnapshot = await getDocs(q);
-
-                if (!querySnapshot.empty) {
-                    const followedUser = querySnapshot.docs[0].data();
-                    if (followedUser.actions) {
-                        return followedUser.actions.map(action => ({
-                            action,
-                            name: followedUser.name
-                        }));
-                    }
-                }
-                return [];
-            });
-
-            // Wait for all actions from followed users to be retrieved
-            const actionsFromAll = await Promise.all(promises);
-            const flatActions = actionsFromAll.flat();
+            const followActions = followActionsSnapshot.docs.map((action) => ({
+                ...action.data()
+            }));
 
             setChecked(true);
-            setFeed([...userActions, ...flatActions]);
+            setFeed([...userActions, ...followActions]);
 
         } catch (error) {
             console.error("Error fetching profiles:", error);
         }
     };
+
 
     const getUserFeed = async () => {
         try {
-
-            // Get the current user's data
-            const q = query(collection(db, "users"), where("id", "==", profileID));
+            const q = query(collection(db, "feed"), where("user", "==", profileID));
             const querySnapshot = await getDocs(q);
 
             if (querySnapshot.empty) {
@@ -82,36 +72,27 @@ function Feed({ isAuth, profileID }) {
                 return;
             }
 
-            const userDoc = querySnapshot.docs[0];
-            const userData = userDoc.data();
-
-            let userActions = [];
-            if (userData.actions) {
-                userActions = userData.actions.map((action) => ({
-                    action,
-                    name: userData.name
-                }));
-            }
+            const userActions = querySnapshot.docs.map((action) => ({
+                ...action.data()
+            }));
 
             setChecked(true);
-
-            if (userActions.length > 0) {
-                setFeed(userActions);
-            }
+            setFeed(userActions);
 
         } catch (error) {
             console.error("Error fetching profiles:", error);
         }
     };
+
 
 
     // Sort feed when it's updated
     useEffect(() => {
+        console.log(feed);
         if (feed.length > 0) {
             const sorted = feed
-                .filter((item) => item.action && item.action.time) // Ensure action and date exist
-                .sort((a, b) => new Date(b.action.time) - new Date(a.action.time)); // Sort by date
-            console.log(feed);
+                .filter((item) => item.loggedFor && item.loggedOn) // Ensure action and date exist
+                .sort((a, b) => new Date(b.loggedOn) - new Date(a.loggedOn)); // Sort by date
             setSortedFeed(sorted);
         }
     }, [feed]);

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from "../firebase-config";
-import { query, collection, where, getDocs } from "firebase/firestore";
+import { query, collection, where, getDocs, doc, updateDoc } from "firebase/firestore";
 import { updateStatsLogic } from './UpdateStats';
 import DisplayFit from './DisplayFit';
 
 const FavFits = ({ isAuth }) => {
     const [favFits, setFavFits] = useState([]);
+    const [codes, setCodes] = useState([]);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -15,6 +16,48 @@ const FavFits = ({ isAuth }) => {
         });    
         return () => unsubscribe();
     }, []);
+
+    const genFitCode = async (curFit) => {
+        if (!curFit) return;
+        let fitCode = "";
+        console.log("curFit:", curFit);
+        let keys = Object.keys(curFit);
+
+        keys.forEach((key) => {
+            const item = curFit[key];
+
+            if (key === "accessories" && Array.isArray(item) && item.length > 0) {
+                fitCode += "--";
+                item.forEach((obj) => {
+                    if (obj.id) {
+                        if (obj.id.length < 10) {
+                            fitCode += ("0000000" + obj.id);
+                        } else {
+                            fitCode += obj.id;
+                        }
+                    } else {
+                        console.error(`Missing id in Accessories object:`, obj);
+                    }
+                });
+                fitCode += "--";
+            } else if (key === "accessories" && Array.isArray(item) && item.length === 0) {
+                fitCode += "----";
+            }
+
+            if (item && item.id && key !== "accessories") {
+                if (item.id.length < 10) {
+                    fitCode += ("0000000" + item.id);
+                } else {
+                    fitCode += item.id;
+                }
+            } else {
+                console.error(`Invalid or missing 'id' for key '${key}':`, item);
+            }
+        });
+
+        console.log("Generated fitCode:", fitCode);
+        return (fitCode);
+    };
 
     const getFits = async () => {
         try {
@@ -33,29 +76,71 @@ const FavFits = ({ isAuth }) => {
                 const userData = userDoc.data();
                 await Promise.all(userData.favFits.map(async (fit) => {
                     try {
-                        const parsedAccessories = JSON.parse(fit.accessories || '[]');
-                        const realFit = {
-                            hat: fit.hat,
-                            jacket: fit.jacket,
-                            top: fit.top,
-                            bottom: fit.bottom,
-                            shoe: fit.shoe,
-                            accessories: parsedAccessories,
-                        };
-                        fitSet.add(realFit);
+                        fitSet.add(await getFitFromCode(fit));
                     } catch (error) {
-                        console.error('Error parsing accessories:', error);
+                        console.error('Error:', error);
                     }
                 }));
             }));
-            setFavFits(Array.from(fitSet));
+
+            let fits = Array.from(fitSet)
+            setFavFits(fits);
+
         } catch (error) {
             console.error("Error fetching items:", error);
         }
     };    
 
+    const getFitFromCode = async (outfitID) => {
+        const outfit = {
+            hat: null,
+            jacket: null,
+            top: null,
+            bottom: null,
+            shoe: null,
+            accessories: [],
+        };
+        let cats = Object.keys(outfit);
+        for (let i = 0; i < 5; i++) {
+            let curID = outfitID.substr(i * 10, 10);
+
+            if (curID === "0000000000") {
+                curID = "000";
+            }
+            if (curID === "0000000001") {
+                curID = "001";
+            }
+
+            const b = query(collection(db, "clothing"), where("id", "==", curID));
+            const data = await getDocs(b);
+            data.forEach((doc) => {
+                outfit[cats[i]] = doc.data();
+            });
+        }
+
+        let accs = outfitID.substring(52, outfitID.length - 2);
+        console.log("accs", accs);
+
+        for (let i = 0; i < accs.length / 10; i++) {
+            let curID = accs.substr(i * 10, 10);
+
+            if (curID === "0000000002") {
+                curID = "002";
+            }
+
+            const b = query(collection(db, "clothing"), where("id", "==", curID));
+            const data = await getDocs(b);
+            data.forEach((doc) => {
+                outfit.accessories.push(doc.data());
+            });
+        }
+
+        return (outfit);
+
+    }
+
     const handleRemoveFit = (fit) => {
-        setFavFits((prevItems) => prevItems.filter((f) => f.hat !== fit.hat && f.jacket !== fit.jacket && f.top !== fit.top && f.bottom !== fit.bottom && f.accessories !== fit.accessories && f.shoe !== fit.shoe));
+        setFavFits((prevItems) => prevItems.filter((f) => f === fit));
         console.log(favFits);
     }
 
@@ -64,7 +149,7 @@ const FavFits = ({ isAuth }) => {
             {favFits.length > 0 ? (
                 <div className='favFitsContainer'>
                     {favFits.map((fit) => (
-                        <DisplayFit key={fit.id} curFit={fit} removeFit={handleRemoveFit} curUser={true}/>
+                        <DisplayFit key={fit} fit={fit} removeFit={handleRemoveFit} curUser={true}/>
                     ))}
                 </div>
             ) : (

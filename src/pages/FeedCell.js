@@ -6,23 +6,20 @@ import DisplayFit from "./DisplayFit";
 
 function FeedCell({ action, index }) {
 
+    const [liked, setLiked] = useState()
+
     return (
         <div className="feedCellContainer">
-
-            {action.action.type === "fit" ?
-            <>
                 <h3>{action.name} logged an outfit!</h3>
+                {action.title && <p>{action.title}</p>}
                 <div className="actionContainer" key={index}>
-                    <DisplayFit curFit={JSON.parse(action.action.content)} />
+                    <DisplayFit fitCode={action.fitCode} />
                 </div>
-                {action.action.on && <p>Outfit for {action.action.on}</p>}
-            </>
-                :
-                <div>
-                    <h3>{action.name} added an item!</h3>
-
-                </div>
-            }
+                {action.loggedFor && <p>Outfit for {action.loggedFor}</p>}
+                {action.desc && <p>{action.desc}</p>}
+                    <div>
+                        <div>{liked ? "liked" : "unliked"}</div>
+                    </div>
         </div>
     );
 }

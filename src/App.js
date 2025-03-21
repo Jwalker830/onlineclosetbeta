@@ -13,6 +13,7 @@ import Profile from './pages/Profile.js';
 import AutoTag from './pages/AutoTag.js';
 import Feed from './pages/Feed.js';
 import About from './pages/About.js';
+import LogField from './pages/LogField.js';
 
 function App() {
     const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth"));
@@ -58,6 +59,7 @@ function App() {
                     <Route path="/:profileId" element={<Closet isAuth={isAuth} />} />
                     <Route path="/feed" element={<Feed isAuth={isAuth} />} />
                     <Route path="/about" element={<About />} />
+                    <Route path="/createlog" element={<LogField/>} />
                 </Routes>
             </div>
         </Router>

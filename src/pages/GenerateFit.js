@@ -321,29 +321,29 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
     const removeFit = () => {
         console.log("removed");
     }
-    
+
+    const genCode = (len) => {
+        const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        let output = '';
+        for (let i = 0; i < len; ++i) {
+            output += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return output;
+    };
 
     let navigate = useNavigate();
 
     const handleLogging = async () => {
         try {
-            const userDoc = doc(db, 'users', auth.currentUser.uid);
-
-            await updateDoc(userDoc, {
-                fitLog: arrayUnion(date + " " + JSON.stringify(curFit))
-            });
-    
-            console.log('logged' + date + " " + JSON.stringify(curFit));
-
-            await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-                actions: arrayUnion({ user: auth.currentUser.uid, type: "fit", content: JSON.stringify(curFit), time: moment().format('YYYY-MM-DD HH:mm:ss'), on: date })
-            });
-
-            console.log("logged ", { type: "fit", content: JSON.stringify(curFit), time: moment().format('YYYY-MM-DD HH:mm:ss'), on: date});
+            localStorage.setItem("logFor", date);
+            localStorage.setItem("curFit", JSON.stringify(curFit));
+            console.log(localStorage.getItem("curFit"));
+            let codeHandle = genCode(17);
+            localStorage.setItem("logId", codeHandle);
 
             const stats = await updateStatsLogic(id);
             console.log("Updated Stats:", stats);
-            navigate("/profile/" + id);
+            navigate("/createlog");
         } catch (error) {
             console.error('Error updating fit log:', error);
         }
@@ -370,7 +370,7 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
                                 <input placeholder='tag...' onChange={(e) => updatePrompt(e.target.value)}></input>
                             </div>
                             }
-                            <DisplayFit curFit={curFit} removeFit={removeFit} curUser={isCurUser}/>
+                            <DisplayFit fit={curFit} removeFit={removeFit} curUser={isCurUser}/>
                         </div>
                     }
                 </>

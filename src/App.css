@@ -833,7 +833,7 @@ input{
 
 .feedCellContainer {
     width: 500px;
-    height: 500px;
+    height: 800px;
     margin: auto;
     margin-bottom: 50px;
     background-color: var(--color4);
@@ -886,4 +886,8 @@ input{
 .swipeFitContainer .fitContainerWStar {
     width: 200px;
     margin: auto;
+}
+
+.logFitContainer {
+    width: 200px;
 }
