@@ -39,6 +39,9 @@ function Profile({ isAuth }) {
     const [curIndex, setCurIndex] = useState();
     const [tempName, setTempName] = useState();
 
+    // New state variable to track the active carousel tab
+    const [activeCarousel, setActiveCarousel] = useState("stats");
+
     const updateCurIndex = (newIndex) => {
         setCurIndex(newIndex);
     };
@@ -198,7 +201,6 @@ function Profile({ isAuth }) {
             setFollows(userData.following.includes(auth.currentUser.uid));
             setFollowing(userData.followers.includes(auth.currentUser.uid));
             setFriends(userData.following.includes(auth.currentUser.uid) && userData.followers.includes(auth.currentUser.uid));
-
         } catch (error) {
             console.error("Error checking following status:", error);
             setFollowing(false);
@@ -266,7 +268,6 @@ function Profile({ isAuth }) {
                         <div className="profileFollowers profileCount" onClick={() => toggleModal("follower")}>
                             <h2>Followers</h2>
                             {followerList && followerList.length >= 0 ?
-
                                 <h3>{followerList.length}</h3>
                                 :
                                 <h3>0</h3>
@@ -275,15 +276,14 @@ function Profile({ isAuth }) {
                         <div className="profileFollowing profileCount" onClick={() => toggleModal("following")}>
                             <h2>Following</h2>
                             {followingList && followingList.length >= 0 ?
-
                                 <h3>{followingList.length}</h3>
                                 :
                                 <h3>0</h3>
                             }
                         </div>
                     </div>
-                    <>{(follows && !friends) && <h3>Follows you</h3>}</>
-                    <>{friends && <h3>Friends</h3>}</>
+                    {(follows && !friends) && <h3>Follows you</h3>}
+                    {friends && <h3>Friends</h3>}
                     {auth.currentUser && auth.currentUser.uid !== profileId &&
                         <>
                             {following !== null &&
@@ -302,26 +302,54 @@ function Profile({ isAuth }) {
                                 {renderItems(sortedItems.accessories, 'Accessories')}
                                 {renderItems(sortedItems.other, 'Unorganized Items')}
                             </div>
-                            <button onClick={() => { viewItems(profile.id)}}>View in Closet</button>
+                            <button onClick={() => { viewItems(profile.id) }}>View in Closet</button>
                         </div>
                     ) : (
                         <div>No Items</div>
                     )}
 
-                    <ShowStats handleViewItem={handleViewItem} id = { profile.id }></ShowStats>
+                    <div className="carouselTabs">
+                        <button
+                            className={activeCarousel === "stats" ? "active" : ""}
+                            onClick={() => setActiveCarousel("stats")}>
+                            Stats
+                        </button>
+                        <button
+                            className={activeCarousel === "outfits" ? "active" : ""}
+                            onClick={() => setActiveCarousel("outfits")}>
+                            Outfit Log
+                        </button>
+                        <button
+                            className={activeCarousel === "feed" ? "active" : ""}
+                            onClick={() => setActiveCarousel("feed")}>
+                            Feed
+                        </button>
+                    </div>
+
+                    <div className="carouselContent">
+                        {activeCarousel === "stats" &&
+                            <ShowStats handleViewItem={handleViewItem} id={profile.id} />
+                        }
+                        {activeCarousel === "outfits" &&
+                            <OutfitLog profileID={profile.id} />
+                        }
+                        {activeCarousel === "feed" &&
+                            <Feed profileID={profile.id} />
+                        }
+                    </div>
                 </>
                 :
                 <>
-                    {sortedItems.flat && curItem && profile && <ViewField item={curItem} setCurItem={updateCurItem} index={sortedItems.flat.indexOf(curItem)} itemArray={sortedItems.flat} setCurIndex={updateCurIndex} isOnMobile={onMobile} />}
-                </>
-            }
-
-            {profile && !curItem &&
-                <>
-                    <h1>Outfit Log</h1>
-                    <OutfitLog profileID={profile.id} />
-                    <br></br>
-                    <Feed profileID={profile.id} />
+                    {sortedItems.flat && curItem && profile &&
+                        <ViewField
+                            item={curItem}
+                            setCurItem={updateCurItem}
+                            index={sortedItems.flat.indexOf(curItem)}
+                            itemArray={sortedItems.flat}
+                            setCurIndex={updateCurIndex}
+                            isOnMobile={onMobile}
+                        />
+                    }
                 </>
             }
 
@@ -329,7 +357,10 @@ function Profile({ isAuth }) {
                 <div className="modalOverlay">
                     <div className="modalContent">
                         <button className="closeModal" onClick={closeModal}>X</button>
-                        <ProfileList profiles={modalType === "follower" ? followerList : followingList} setNewProfile={setNewProfileID} />
+                        <ProfileList
+                            profiles={modalType === "follower" ? followerList : followingList}
+                            setNewProfile={setNewProfileID}
+                        />
                     </div>
                 </div>
             )}

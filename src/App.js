@@ -14,6 +14,7 @@ import AutoTag from './pages/AutoTag.js';
 import Feed from './pages/Feed.js';
 import About from './pages/About.js';
 import LogField from './pages/LogField.js';
+import ViewLog from './pages/ViewLog.js'
 
 function App() {
     const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth"));
@@ -55,6 +56,7 @@ function App() {
                     <Route path="/search" element={<Search isAuth={isAuth} />} />
                     <Route path="/profile" element={<Profile isAuth={isAuth} />} />
                     <Route path="/profile/:profileId" element={<Profile isAuth={isAuth} />} />
+                    <Route path="/post/:logId" element={<ViewLog isAuth={isAuth} />} />
                     <Route path="/" element={<Closet isAuth={isAuth} />} />
                     <Route path="/:profileId" element={<Closet isAuth={isAuth} />} />
                     <Route path="/feed" element={<Feed isAuth={isAuth} />} />

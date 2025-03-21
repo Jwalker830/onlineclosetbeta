@@ -832,11 +832,18 @@ input{
 }
 
 .feedCellContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     width: 500px;
     height: 800px;
     margin: auto;
     margin-bottom: 50px;
     background-color: var(--color4);
+}
+
+.bottomFeed{
+    margin-bottom: 30px;
 }
 
 .actionContainer {
@@ -890,4 +897,34 @@ input{
 
 .logFitContainer {
     width: 200px;
+    margin-right: 50px;
+}
+
+.carouselTabs {
+    margin: auto;
+    margin-top: 40px;
+    margin-bottom: 40px;
+    width: 65%;
+    display: flex;
+    justify-content: space-between
+}
+
+.carouselTabs button {
+    width: 30%;
+    border: hidden;
+    background-color: var(--color3);
+    height: 75px;
+    font-size: 55px;
+    font-weight: bold;
+}
+
+.interactButtons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.logInfoField {
+    display: flex;
+    justify-content: space-around;
 }

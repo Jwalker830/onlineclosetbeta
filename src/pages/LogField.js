@@ -123,6 +123,7 @@ const LogField = ({ fit, isOnMobile }) => {
         };
         await setDoc(doc(db, 'feed', logId), actToLog);
         console.log("saved!");
+        navigate("/profile/" + auth.currentUser.uid);
     }
 
 
