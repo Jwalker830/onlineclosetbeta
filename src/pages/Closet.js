@@ -521,7 +521,9 @@ function Closet({ isAuth }) {
                         {(displayFit && curFit) ?
                             <>
                                 <button onClick={() => { goProfile() }}>View Profile</button>
-                                <DisplayFit fit={curFit} />
+                                <div style={{ width: "200px", margin: "auto" }} >
+                                    <DisplayFit fit={curFit} />
+                                </div>
                             </>
                             :
                             <p>Loading...</p>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { setDoc, doc, query, collection, where, getDocs, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { query, collection, where, getDocs, updateDoc, arrayUnion, arrayRemove, doc } from "firebase/firestore";
 import { db, auth, provider } from "../firebase-config";
 import { getStorage } from 'firebase/storage';
 import { MdOutlineFileUpload } from 'react-icons/md';
@@ -16,6 +16,7 @@ const ViewLog = ({ isOnMobile }) => {
     const inputRef = useRef(null);
     let navigate = useNavigate();
 
+    // Fetch the log document from Firestore using the logId from the URL.
     useEffect(() => {
         const fetchLog = async () => {
             if (paramLogId) {
@@ -30,16 +31,18 @@ const ViewLog = ({ isOnMobile }) => {
         fetchLog();
     }, [paramLogId]);
 
+    // Check if the current user has liked the log.
+    // If no user is logged in, simply set liked to false.
     const [liked, setLiked] = useState(false);
-
     useEffect(() => {
-        if (log && log.likedBy && log.likedBy.includes(auth.currentUser.uid)) {
+        if (log && auth.currentUser && log.likedBy && log.likedBy.includes(auth.currentUser.uid)) {
             setLiked(true);
         } else {
             setLiked(false);
         }
     }, [log]);
 
+    // Fetch the outfit based on log.fitCode.
     useEffect(() => {
         if (!log || !log.fitCode) return;
 
@@ -68,6 +71,7 @@ const ViewLog = ({ isOnMobile }) => {
                 });
             }
 
+            // Obtain accessories from the fitCode.
             let accs = outfitID.substring(52, outfitID.length - 2);
             console.log("accs", accs);
             for (let i = 0; i < accs.length / 10; i++) {
@@ -93,8 +97,9 @@ const ViewLog = ({ isOnMobile }) => {
         fetchFit();
     }, [log]);
 
+    // Handle like functionality. If the user is not authenticated, do nothing.
     const handleLike = async () => {
-        if (!log) return;
+        if (!log || !auth.currentUser) return; // Do nothing if not authenticated.
         const actionRef = doc(db, 'feed', log.logId);
         if (!liked) {
             await updateDoc(actionRef, {
@@ -133,7 +138,11 @@ const ViewLog = ({ isOnMobile }) => {
                         <h3>{log.desc}</h3>
                     </div>
                     <p>{Array.isArray(log.tags) ? log.tags.join(', ') : log.tags}</p>
-                    <div onClick={handleLike} style={{ cursor: "pointer" }}>
+                    <div
+                        onClick={auth.currentUser ? handleLike : () => { navigate("/login"); }}
+                        style={{ cursor: auth.currentUser ? "pointer" : "default" }}
+                        title={auth.currentUser ? "" : "Log in to like this outfit"}
+                    >
                         {liked ? (
                             <FaHeart style={{ fontSize: "48px", color: "black" }} />
                         ) : (

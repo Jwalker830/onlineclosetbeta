@@ -7,23 +7,32 @@ import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 function FeedCell({ action, index }) {
     const [liked, setLiked] = useState(false);
-
     let navigate = useNavigate();
 
+    // Check if the current user is authenticated and liked the post
     useEffect(() => {
-        if (action.likedBy.includes(auth.currentUser.uid)) {
-            setLiked(true);
+        if (auth.currentUser && action.likedBy) {
+            if (action.likedBy.includes(auth.currentUser.uid)) {
+                setLiked(true);
+            } else {
+                setLiked(false);
+            }
         } else {
             setLiked(false);
         }
     }, [action]);
 
-    const handleLike = async () => {
+    const handleLike = async (e) => {
+        // Prevent the parent click handler from firing
+        e.stopPropagation();
+        // If the user is not authenticated, do nothing
+        if (!auth.currentUser) return;
         const actionRef = doc(db, 'feed', action.logId);
         if (!liked) {
             await updateDoc(actionRef, {
                 likedBy: arrayUnion(auth.currentUser.uid)
             });
+            // Update the local action object (for immediate UI update)
             action.likedBy.push(auth.currentUser.uid);
             setLiked(true);
         } else {
@@ -48,20 +57,24 @@ function FeedCell({ action, index }) {
                     <DisplayFit fitCode={action.fitCode} />
                 </div>
             </div>
-
             <div className="bottomFeed">
                 {action.loggedFor && <p>Outfit for {action.loggedFor}</p>}
                 {action.desc && <p>{action.desc}</p>}
                 <div className="interactButtons">
-                    <div onClick={handleLike} style={{ cursor: "pointer" }}>
+                    <div
+                        onClick={auth.currentUser ? handleLike : () => { navigate("/login"); } }
+                        style={{
+                            cursor: auth.currentUser ? "pointer" : "default"
+                        }}
+                        title={auth.currentUser ? "" : "Log in to like this outfit"}
+                    >
                         {liked ? (
                             <FaHeart style={{ fontSize: "48px", color: "black" }} />
                         ) : (
                             <FaRegHeart style={{ fontSize: "48px", color: "black" }} />
                         )}
-
                         <span style={{ marginLeft: "10px", fontSize: "18px" }}>
-                            {action.likedBy.length}
+                            {action.likedBy && action.likedBy.length}
                         </span>
                     </div>
                 </div>
