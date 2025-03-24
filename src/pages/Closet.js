@@ -91,22 +91,12 @@ function Closet({ isAuth }) {
         if (paramProfileId) {
             if (paramProfileId.length === 28) {
                 setCurrentID(paramProfileId);
-            }
-
-            if (paramProfileId.length > 28) {
+            } else {
                 if (!isAuth) {
                     setDisplayFit(true);
                 }
                 getFitFromCode(paramProfileId);
             }
-
-            const unsubscribe = onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    setCurrentID(user.uid);
-                }
-            });
-
-            return () => unsubscribe();
         } else {
             const unsubscribe = onAuthStateChanged(auth, (user) => {
                 if (user) {
@@ -165,6 +155,8 @@ function Closet({ isAuth }) {
                 outfit.accessories.push(doc.data());
             });
         }
+
+        setCurrentID(outfit.top.owner);
         
         setCurFit(outfit)
 

@@ -32,7 +32,7 @@ const ViewField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile
 
     const styleGarment = () => {
         localStorage.setItem("item", JSON.stringify(item));
-        navigate("/");
+        navigate("/" + item.owner);
     }
 
     const convertColor = (inputColor) => {

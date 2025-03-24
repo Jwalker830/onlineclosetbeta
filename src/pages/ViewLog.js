@@ -116,6 +116,17 @@ const ViewLog = ({ isOnMobile }) => {
         }
     };
 
+    const goProfile = async () => {
+        if (log.user) {
+            console.log(log.user)
+            navigate(`/profile/${log.user}`)
+        }
+        else {
+            console.log(curFit.top.owner);
+            navigate(`/profile/${curFit.top.owner}`)
+        }
+    }
+
     return (
         log !== null && (
             <div
@@ -129,6 +140,7 @@ const ViewLog = ({ isOnMobile }) => {
                     <DisplayFit fit={curFit} />
                 </div>
                 <div className="details-container">
+                    <h1 onClick={() => { goProfile() }}>{log.name}</h1>
                     <div className="input-container">
                         <label htmlFor="title">Title:</label>
                         <h1>{log.title}</h1>
