@@ -73,7 +73,7 @@ const ImgUpload = ({ addItemList }) => {
   
       try {
         // Send the image file to the Python server for background removal
-        const response = await axios.post('https://web-production-933d3.up.railway.app', formData, {
+        const response = await axios.post('https://removebg-production-17df.up.railway.app', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           },
