@@ -14,7 +14,8 @@ import AutoTag from './pages/AutoTag.js';
 import Feed from './pages/Feed.js';
 import About from './pages/About.js';
 import LogField from './pages/LogField.js';
-import ViewLog from './pages/ViewLog.js'
+import ViewLog from './pages/ViewLog.js';
+import GeneratePackingList from './pages/GeneratePackingList';
 
 function App() {
     const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth"));
@@ -33,6 +34,7 @@ function App() {
                 <div className="nav-top">
                     {isAuth && <Link to="/feed">Feed</Link>}
                     {isAuth && <Link to="/" onClick={() => { localStorage.removeItem("closetID") }}>Closet</Link>}
+                    {isAuth && <Link to="/pack">Pack</Link>}
                     {isAuth && <Link to="/fits">Outfits</Link>}
                     {isAuth && <Link to="/tagitems">Tag Items</Link>}
                     {isAuth && <Link to="/profile">Profile</Link>}
@@ -52,6 +54,7 @@ function App() {
                     <Route path="/tagitems" element={<TagItems isAuth={isAuth} />} />
                     <Route path="/login" element={<Login setIsAuth={setIsAuth} />} />
                     <Route path="/swipe" element={<SwipeFits />} />
+                    <Route path="/pack" element={<GeneratePackingList setIsAuth={setIsAuth}/>} />
                     <Route path="/fits" element={<FavFits isAuth={isAuth} />} />
                     <Route path="/search" element={<Search isAuth={isAuth} />} />
                     <Route path="/profile" element={<Profile isAuth={isAuth} />} />

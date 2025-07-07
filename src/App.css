@@ -928,3 +928,40 @@ input{
     display: flex;
     justify-content: space-around;
 }
+
+/* column on the right */
+.rightPanel {
+    width: 340px; /* adjust until it feels right  */
+    border-left: 2px solid var(--color1);
+    background: var(--color4);
+    padding: 10px 6px;
+    overflow-y: auto; /* single scroll bar if needed  */
+}
+
+    /* thumbnails a bit smaller than full closet */
+    .rightPanel .closetItemImg {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border: 2px solid var(--color0);
+        border-radius: 4px;
+    }
+
+/* tighter rows so the user seldom scrolls */
+.articleDisplay {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 6px; /* small gap between categories */
+}
+
+.packingPage {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.rowDisplay {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+}
