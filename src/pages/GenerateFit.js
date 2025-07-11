@@ -10,7 +10,7 @@ import DisplayFit from "./DisplayFit";
 import { updateStatsLogic } from './UpdateStats';
 import moment from 'moment';
 
-function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, id, logging, date }) {
+function GenerateFit({ isAuth, userItems, passFit, setNewFit, baseItems, clearLockedItems, id, logging, date }) {
     const tcom = require('thesaurus-com');
     const [isCurUser, setIsCurUser] = useState()
     const [prefItems, setPrefItems] = useState({
@@ -52,6 +52,12 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
     }
 
     useEffect(() => {
+        if (userItems) {
+            setDisplayedItems(userItems);
+        }
+    })
+
+    useEffect(() => {
         if(auth.currentUser){
             setIsCurUser(id === auth.currentUser.uid);
             localStorage.removeItem("date")
@@ -61,10 +67,6 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
             setIsCurUser(false);
         }
     }, [id])
-
-    const updateItemList = (newItemList) => {
-        setDisplayedItems(newItemList);
-    };
 
     const updatePrefsList = (newPrefsObj) => {
         setUserPrefs(newPrefsObj);
@@ -354,7 +356,6 @@ function GenerateFit({ isAuth, passFit, setNewFit, baseItems, clearLockedItems, 
             {loading ? (
                 <>
                     <p>Loading...</p>
-                    <GetUserItems setItemList={updateItemList} id={id}/>
                     <GetUserPrefs setPrefs={updatePrefsList} id={id}/>
                 </>
             ) : (

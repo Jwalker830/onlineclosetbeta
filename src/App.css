@@ -935,7 +935,9 @@ input{
     border-left: 2px solid var(--color1);
     background: var(--color4);
     padding: 10px 6px;
-    overflow-y: auto; /* single scroll bar if needed  */
+    overflow-y: scroll; /* single scroll bar if needed  */
+    overflow-x: hidden;
+    height: 90vh;
 }
 
     /* thumbnails a bit smaller than full closet */

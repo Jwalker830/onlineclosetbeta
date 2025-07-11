@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { setDoc, doc, query, collection, where, getDocs } from "firebase/firestore";
+import { setDoc, doc, query, collection, where, getDocs, getDoc, documentId } from "firebase/firestore";
 import { db, auth, provider } from "../firebase-config";
 import { onAuthStateChanged  } from "firebase/auth";
 import ImgUpload from './ImgUpload';
@@ -24,6 +24,8 @@ function Closet({ isAuth }) {
     const [sortedItems, setSortedItems] = useState(null);
     const [curFit, setCurFit] = useState(null);
     const [hoveredItem, setHoveredItem] = useState(null);
+    const [selectedCloset, setSelectedCloset] = useState("");
+    const [subClosets, setSubClosets] = useState([]);
     const [lockedItems, setLockedItems] = useState(() => {
         if(localStorage.getItem("curFit")){
             let c = JSON.parse(localStorage.getItem("curFit"));
@@ -89,14 +91,18 @@ function Closet({ isAuth }) {
 
     useEffect(() => {
         if (paramProfileId) {
-            if (paramProfileId.length === 28) {
-                setCurrentID(paramProfileId);
-            } else {
-                if (!isAuth) {
-                    setDisplayFit(true);
-                }
-                getFitFromCode(paramProfileId);
-            }
+             if (paramProfileId.length === 28) {                  // user profile
+                 setCurrentID(paramProfileId);
+                 getClosetFromCode(paramProfileId);
+             } else if (paramProfileId.length === 8) {            // closet code
+                 setSelectedCloset(paramProfileId);
+                 getClosetFromCode(paramProfileId);
+             } else {                                             // outfit code
+                 if (!isAuth) {
+                     setDisplayFit(true);
+                 }
+                 getFitFromCode(paramProfileId);
+             }
         } else {
             const unsubscribe = onAuthStateChanged(auth, (user) => {
                 if (user) {
@@ -169,6 +175,19 @@ function Closet({ isAuth }) {
         }
     }, [userItems]);
 
+    useEffect(() => {
+        if (!currentID) return;
+
+        // read once; if you want live updates use onSnapshot instead
+        getDoc(doc(db, "users", currentID)).then(snap => {
+            if (snap.exists()) {
+                setSubClosets(snap.data().subclosets || []);
+            } else {
+                setSubClosets([]);            // no document yet → empty array
+            }
+        });
+    }, [currentID]);
+
     const sortUserItems = () => {
         const sorted = {
             hats: [],
@@ -198,6 +217,63 @@ function Closet({ isAuth }) {
 
         return sorted;
     }
+
+    const fetchClothes = async ids => {
+        const unique = [...new Set(ids)];      // no duplicates
+        const chunks = [];
+        while (unique.length) chunks.push(unique.splice(0, 10)); // 10 ids / chunk
+
+        const promises = chunks.map(chunk => {
+            const q = query(collection(db, "clothing"),
+                where(documentId(), "in", chunk));
+
+            return getDocs(q);
+        });
+
+        const snaps = await Promise.all(promises);   // ❷  1–15 requests TOTAL
+        const result = [];
+        snaps.forEach(snap =>
+            snap.forEach(doc => result.push({ id: doc.id, ...doc.data() }))
+        );
+        return result;
+    };
+
+   // ---------- turn an 8-char closet code into userItems -------------
+    const getClosetFromCode = async closetId => {
+
+        let ids = [];
+
+        if (paramProfileId.length === 28) {
+            const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+            if (!snap.exists()) { console.warn("No such closet"); return; }
+
+            snap.data().items.forEach((item) => {
+                ids.push(item.id);
+            });
+        }
+        else if(paramProfileId.length === 8){
+            const snap = await getDoc(doc(db, "closets", closetId));
+            if (!snap.exists()) { console.warn("No such closet"); return; }
+
+            const monster = snap.data().items ?? "";   // big concatenated string
+
+            // 1️⃣  ensure the three placeholder ids are present
+            ["000", "001", "002"].forEach(id => {
+                if (!ids.includes(id)) ids.push(id);
+            });
+
+            // pull the 10-character ids out of the monster string
+            for (let i = 0; i < monster.length; i += 10) {
+                ids.push(monster.substr(i, 10));
+            }
+
+        }
+
+        console.log(ids);
+
+        const clothes = await fetchClothes(ids);   // ⇦ batched version
+        setUserItems(clothes);
+    };
 
     const updateCurFit = (item) => {
         let cur = { ...curFit };
@@ -364,10 +440,34 @@ function Closet({ isAuth }) {
 
     return (
         <div>
-            {!displayFit && currentID && <GetUserItems setItemList={updateUserItems} id={currentID} />}
             {sortedItems ? (
                 <>
-                <button onClick={() => { goProfile() }}>View Profile</button>
+                <div style={{ display:"flex", gap:"10px", alignItems:"center" }}>
+                     <button onClick={goProfile}>View Profile</button>
+ 
+                     {/* -------- Garments dropdown -------- */}
+                        <select
+                            value={selectedCloset}
+                            onChange={e => {
+                                const val = e.target.value;
+                                setSelectedCloset(val);
+                                if (!val) {
+                                    navigate("/" + currentID);         // default full closet
+                                } else {
+                                    navigate("/" + val);               // 8-char code → useEffect loads it
+                                }
+                            }}>
+                            <option value="">Default garments</option>
+                            {subClosets.map(code => (
+                                <option key={code} value={code}>{code}</option>
+                            ))}
+                        </select>
+ 
+                     {/* -------- Style dropdown (empty for now) -------- */}
+                     <select disabled>
+                        <option>Style</option>
+                     </select>
+                 </div>
                 <div className='closetContainer'>
                     <div className="leftCloset scroll-container">
                         <div className="articleDisplay scroll-container">
@@ -439,7 +539,7 @@ function Closet({ isAuth }) {
                         </div>
                     </div>
                     <div className="midCloset scroll-container">
-                        <GenerateFit passFit={curFit} setNewFit={loadCurFit} baseItems={lockedItems} clearLockedItems={clearLocked} id={currentID} date={date} logging={logging}/>
+                            <GenerateFit userItems={userItems} passFit={curFit} setNewFit={loadCurFit} baseItems={lockedItems} clearLockedItems={clearLocked} id={currentID} date={date} logging={logging}/>
                     </div>
                     <div className="rightCloset scroll-container">
                         <div className="articleDisplay scroll-container">

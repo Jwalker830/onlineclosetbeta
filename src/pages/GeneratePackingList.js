@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import GetUserItems from "./GetUserItems";
 import GetUserPrefs from "./GetUserPrefs";
 import { auth } from "../firebase-config";
+import { setDoc, doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { db } from "../firebase-config";
 
 /* ---------- helper copied from GenerateFit --------------------------- */
 const sortPrefItems = items => ({
@@ -13,6 +15,13 @@ const sortPrefItems = items => ({
     shoes: items.filter(i => i.type === "Shoes"),
     accessories: items.filter(i => i.type === "Accessory")
 });
+
+const genCode = (len = 8) => {
+    const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    let out = "";
+    for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
+    return out;
+};
 
 // same helper your randomizeFit uses
 const getRandomItems = (array, amt) => {
@@ -69,6 +78,24 @@ function GeneratePackingList() {
             if (next[item.id]) delete next[item.id];
             else next[item.id] = true;
             return next;
+        });
+    };
+
+    /* --------- add / remove helpers -------------------------------- */
+    const addItemToPackingList = item => {
+        setPackingList(prev => {
+            if (!prev) return prev;                            // nothing yet
+            const key = typeKey(item.type);
+            if (prev[key].some(i => i.id === item.id)) return prev;  // already inside
+            return { ...prev, [key]: [...prev[key], item] };
+        });
+    };
+
+    const removeItemFromPackingList = item => {
+        setPackingList(prev => {
+            if (!prev) return prev;
+            const key = typeKey(item.type);
+            return { ...prev, [key]: prev[key].filter(i => i.id !== item.id) };
         });
     };
 
@@ -191,6 +218,40 @@ function GeneratePackingList() {
         }
     };
 
+    /* packing list saver ----------------------------------------------- */
+    const savePackingList = async () => {
+        if (!packingList) return;
+
+        // 1. create the “monster string” (𝒏 × 10-char ids concatenated)
+        const allIds = Object.values(packingList)
+            .flat()                      // merge all category-arrays
+            .map(it => it.id)            // keep only the 10-char id
+            .join("");                   // → single big string
+
+        // 2. generate a unique 8-char document id
+        let code = genCode(8);
+        while (await getDoc(doc(db, "closets", code)).then(s => s.exists())) {
+            code = genCode(8);             // extremely unlikely to loop > once
+        }
+
+        // 3. write the document (field name = "items", but you can choose any)
+        await setDoc(doc(db, "closets", code), { items: allIds });
+
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        await updateDoc(userRef, {
+            subclosets: arrayUnion(code)
+        }).catch(async err => {
+        // if the user doc doesn't exist yet, create it with the array
+        if (err.code === "not-found") {
+        await setDoc(userRef, { subclosets: [code] }, { merge: true });
+            } else {
+                throw err;
+            }
+        });
+
+        alert(`Packing list saved!\nShareable url: ${window.location.origin}/closet/${code}`);
+    };
+
     /* item-scoring helper ---------------------------------------------- */
     const pickBestItem = (
         candidates, alreadyChosen, prefs, likedTags = new Set()) => {
@@ -236,10 +297,17 @@ function GeneratePackingList() {
                 <div key={cat}>
                     <div className="rowDisplay">
                         {arr.map(it => (
-                            <div key={it.id} className="itemContainer">
-                                <img src={it.imgURL}
-                                    alt={it.title}
-                                    className="closetItemImg" />
+                            <div
+                                key={it.id}
+                                className="itemContainer"
+                                onClick={() => removeItemFromPackingList(it)}
+                                title="Click to remove from packing list"
+                            >
+                            <img
+                            src={it.imgURL}
+                            alt={it.title}
+                            className="closetItemImg"
+                            />
                             </div>
                         ))}
                     </div>
@@ -258,7 +326,10 @@ function GeneratePackingList() {
                     <div
                         key={item.id}
                         className="itemContainer"
-                        onClick={() => toggleLock(item)}
+                        onClick={() => {
+                            toggleLock(item);
+                            if (packingList) addItemToPackingList(item);
+                        }}
                     >
                         <img
                             src={item.imgURL}
@@ -293,8 +364,20 @@ function GeneratePackingList() {
                     </label>
                     &nbsp;&nbsp;
                     <button onClick={generatePackingList}>
-                        Generate packing list
+                        Generate
                     </button>
+                    &nbsp;&nbsp;
+                    {locked !== {} && (
+                        <button onClick={() => { setLocked({}) }}>
+                            Clear Selections
+                        </button>
+                    )}
+                    &nbsp;
+                    {packingList && (
+                        <button onClick={savePackingList}>
+                            Save list
+                        </button>
+                    )}
                 </div>
 
                 {/* result */}
