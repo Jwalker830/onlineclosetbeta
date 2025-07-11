@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { setDoc, doc, query, collection, where, getDocs, getDoc, documentId } from "firebase/firestore";
+import { setDoc, doc, query, collection, where, getDocs, getDoc, deleteDoc, updateDoc, arrayRemove, documentId } from "firebase/firestore";
 import { db, auth, provider } from "../firebase-config";
 import { onAuthStateChanged  } from "firebase/auth";
 import ImgUpload from './ImgUpload';
@@ -438,6 +438,40 @@ function Closet({ isAuth }) {
         }
     }
 
+    const deleteCloset = async () => {
+        // nothing selected or trying to delete the default wardrobe
+        if (!selectedCloset) {
+            alert("Select a sub-closet first.");
+            return;
+        }
+
+        const ok = window.confirm(
+            `Permanently delete sub-closet “${selectedCloset}”?`
+        );
+        if (!ok) return;
+
+        try {
+            /* 1️⃣  remove the closet document itself */
+            await deleteDoc(doc(db, "closets", selectedCloset));
+
+            /* 2️⃣  remove the code from the user’s subclosets array */
+            const uid = currentID || auth.currentUser.uid;
+            await updateDoc(doc(db, "users", uid), {
+                subclosets: arrayRemove(selectedCloset)
+            });
+
+            /* 3️⃣  update local state / UI */
+            setSubClosets(prev => prev.filter(code => code !== selectedCloset));
+            setSelectedCloset("");        // back to default garments
+            navigate("/" + uid);
+
+            alert("Closet deleted.");
+        } catch (err) {
+            console.error("Failed to delete closet:", err);
+            alert("Something went wrong – closet not deleted.");
+        }
+    };
+
     return (
         <div>
             {sortedItems ? (
@@ -466,7 +500,13 @@ function Closet({ isAuth }) {
                      {/* -------- Style dropdown (empty for now) -------- */}
                      <select disabled>
                         <option>Style</option>
-                     </select>
+                        </select>
+
+                        {selectedCloset &&
+                            <button onClick={deleteCloset}>
+                                Delete Closet
+                            </button>
+                        }
                  </div>
                 <div className='closetContainer'>
                     <div className="leftCloset scroll-container">

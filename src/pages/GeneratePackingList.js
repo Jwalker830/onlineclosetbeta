@@ -120,7 +120,7 @@ function GeneratePackingList() {
             ? MIN_TABLE[Math.min(days, 10)]
             : {
                 tops: days, bottoms: days, jackets: days,
-                shoes: 1, hats: days, accessories: days
+                shoes: 3, hats: days, accessories: days
             };
 
         /* -------- treat every locked item as a base item --- */
