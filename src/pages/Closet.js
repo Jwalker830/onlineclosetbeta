@@ -97,10 +97,8 @@ function Closet({ isAuth }) {
              } else if (paramProfileId.length === 8) {            // closet code
                  setSelectedCloset(paramProfileId);
                  getClosetFromCode(paramProfileId);
-             } else {                                             // outfit code
-                 if (!isAuth) {
-                     setDisplayFit(true);
-                 }
+             } else {            
+                 setDisplayFit(true);
                  getFitFromCode(paramProfileId);
              }
         } else {
@@ -119,6 +117,9 @@ function Closet({ isAuth }) {
 
 
     const getFitFromCode = async (outfitID) => {
+        if (isAuth) {
+            getClosetFromCode(paramProfileId);
+        }
         const outfit = {
             hat: null,
             jacket: null,
@@ -161,8 +162,6 @@ function Closet({ isAuth }) {
                 outfit.accessories.push(doc.data());
             });
         }
-
-        setCurrentID(outfit.top.owner);
         
         setCurFit(outfit)
 
@@ -251,7 +250,7 @@ function Closet({ isAuth }) {
                 ids.push(item.id);
             });
         }
-        else if(paramProfileId.length === 8){
+        else if (paramProfileId.length === 8) {
             const snap = await getDoc(doc(db, "closets", closetId));
             if (!snap.exists()) { console.warn("No such closet"); return; }
 
@@ -267,6 +266,14 @@ function Closet({ isAuth }) {
                 ids.push(monster.substr(i, 10));
             }
 
+        } else {
+            const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+            if (!snap.exists()) { console.warn("No such closet"); return; }
+
+            snap.data().items.forEach((item) => {
+                console.log(item.id);
+                ids.push(item.id);
+            });
         }
 
         console.log(ids);
