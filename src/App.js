@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import './App.css';
 import { HashRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { signOut } from "firebase/auth";
@@ -19,6 +19,7 @@ import GeneratePackingList from './pages/GeneratePackingList';
 
 function App() {
     const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth"));
+    const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
 
     const signUserOut = () => {
         signOut(auth).then(() => {
@@ -26,10 +27,42 @@ function App() {
             setIsAuth(false);
             window.location.pathname = "/onlineclosetbeta/login";
         });
-    }
+    };
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsPortrait(window.innerHeight > window.innerWidth);
+        };
+        window.addEventListener("resize", handleResize);
+        window.addEventListener("orientationchange", handleResize);
+        return () => {
+            window.removeEventListener("resize", handleResize);
+            window.removeEventListener("orientationchange", handleResize);
+        };
+    }, []);
 
     return (
         <Router>
+            {/* Portrait warning overlay */}
+            {isPortrait && (
+                <div style={{
+                    position: "fixed",
+                    top: 0, left: 0,
+                    width: "100%", height: "100%",
+                    backgroundColor: "rgba(0,0,0,0.85)",
+                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 9999,
+                    textAlign: "center",
+                    padding: "20px",
+                    fontSize: "1.5rem"
+                }}>
+                    Please flip your phone horizontal
+                </div>
+            )}
+
             <nav>
                 <div className="nav-top">
                     {isAuth && <Link to="/feed">Feed</Link>}
@@ -54,7 +87,7 @@ function App() {
                     <Route path="/tagitems" element={<TagItems isAuth={isAuth} />} />
                     <Route path="/login" element={<Login setIsAuth={setIsAuth} />} />
                     <Route path="/swipe" element={<SwipeFits />} />
-                    <Route path="/pack" element={<GeneratePackingList setIsAuth={setIsAuth}/>} />
+                    <Route path="/pack" element={<GeneratePackingList setIsAuth={setIsAuth} />} />
                     <Route path="/fits" element={<FavFits isAuth={isAuth} />} />
                     <Route path="/search" element={<Search isAuth={isAuth} />} />
                     <Route path="/profile" element={<Profile isAuth={isAuth} />} />
@@ -64,7 +97,7 @@ function App() {
                     <Route path="/:profileId" element={<Closet isAuth={isAuth} />} />
                     <Route path="/feed" element={<Feed isAuth={isAuth} />} />
                     <Route path="/about" element={<About />} />
-                    <Route path="/createlog" element={<LogField/>} />
+                    <Route path="/createlog" element={<LogField />} />
                 </Routes>
             </div>
         </Router>

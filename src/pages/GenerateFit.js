@@ -55,7 +55,7 @@ function GenerateFit({ isAuth, userItems, passFit, setNewFit, baseItems, clearLo
         if (userItems) {
             setDisplayedItems(userItems);
         }
-    })
+    },[userItems])
 
     useEffect(() => {
         if(auth.currentUser){

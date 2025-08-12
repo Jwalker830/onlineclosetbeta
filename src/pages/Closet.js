@@ -244,7 +244,7 @@ function Closet({ isAuth }) {
         let ids = [];
 
         if (paramProfileId.length === 28) {
-            const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+            const snap = await getDoc(doc(db, "users", paramProfileId));
             if (!snap.exists()) { console.warn("No such closet"); return; }
 
             snap.data().items.forEach((item) => {
