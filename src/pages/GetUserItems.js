@@ -1,13 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { db, auth } from "../firebase-config";
 import { query, collection, where, getDocs } from "firebase/firestore";
 
 const GetUserItems = ({ setItemList, id }) => {
+    const hasRunOnce = useRef(false);
 
     useEffect(() => {
-        if (id) {
+        if (id && !hasRunOnce.current) {
             console.log(id);
             getItems();
+            hasRunOnce.current = true;
         }
     }, [id]);
 

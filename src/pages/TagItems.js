@@ -11,36 +11,52 @@ const TagItems = ({ isAuth }) => {
     const [curIndex, setCurIndex] = useState();
     const [curItem, setCurItem] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isUploading, setIsUploading] = useState(false);
 
   const onMobile = useMemo(
     () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent),
     []
   );
 
-  const sortItems = (items) => [
-    ...items.filter(i => i.type === "Hat"),
-    ...items.filter(i => i.type === "Jacket"),
-    ...items.filter(i => i.type === "Top"),
-    ...items.filter(i => i.type === "Bottoms"),
-    ...items.filter(i => i.type === "Shoes"),
-    ...items.filter(i => i.type === "Accessory"),
-    ...items.filter(i => !i.type),
-  ].filter(i => !["000","001","002"].includes(i.id));
+    const sortPrefItems = (items) => {
+        const sorted = {
+            hats: [],
+            jackets: [],
+            tops: [],
+            bottoms: [],
+            shoes: [],
+            accessories: [],
+            other: [],
+        };
 
-  const sortedItems = useMemo(
-    () => sortItems(displayedItems),
-    [displayedItems]
-  );
+        sorted.hats = items.filter(item => item.type === "Hat" && item.title !== "No Hat");
+        sorted.jackets = items.filter(item => item.type === "Jacket" && item.title !== "No Jacket");
+        sorted.tops = items.filter(item => item.type === "Top");
+        sorted.bottoms = items.filter(item => item.type === "Bottoms");
+        sorted.shoes = items.filter(item => item.type === "Shoes");
+        sorted.accessories = items.filter(item => item.type === "Accessory" && item.title !== "No Accessory");
+        sorted.other = items.filter(item => item.type === "");
+        console.log(sorted);
+
+        return sorted;
+    };
+
+    const sortedItems = useMemo(() => sortPrefItems(displayedItems), [displayedItems]);
+    
+    const flatItems = useMemo(
+        () => Object.values(sortedItems).flat(),
+        [sortedItems]
+    );
+
+    useEffect(() => {
+        console.log("Newly sorted List:", sortedItems);
+    }, [sortedItems]);
 
   useEffect(() => {
     return auth.onAuthStateChanged(user => {
       if (user) setLoading(false);
     });
   }, []);
-
-  const addToItemList = (item) => {
-    setDisplayedItems(prev => [...prev, item]);
-  };
 
   const mergeItemList = (items) => {
     setDisplayedItems(prev => {
@@ -75,22 +91,26 @@ const TagItems = ({ isAuth }) => {
       <GetUserItems setItemList={mergeItemList} id={auth.currentUser.uid} />
 
       {curItem ? (
-            <TagField item={curItem} setCurItem={updateCurItem} index={sortedItems.indexOf(curItem)} itemArray={sortedItems} setCurIndex={updateCurIndex} isOnMobile={onMobile}/>
+            <TagField item={curItem} setCurItem={updateCurItem} index={flatItems.findIndex(i => i.id === curItem.id)} itemArray={sortedItems} setCurIndex={updateCurIndex} isOnMobile={onMobile}/>
       ) : (
         <>
           <div className="topRow">
-            <ImgUpload addItemList={addToItemList} />
+            <ImgUpload addItemList={mergeItemList} onUploadStart={() => setIsUploading(true)} onUploadComplete={() => setIsUploading(false)} />
             <Link to="/swipe">Score random outfits</Link>
           </div>
 
-          <ItemDisplay
-            items={sortedItems}
-            setCurItem={setCurItem}
-            removeItem={item =>
-              setDisplayedItems(prev => prev.filter(i => i.id !== item.id))
-            }
-            isOnMobile={onMobile}
-          />
+          {isUploading ? (
+            <p>Uploading and processing items...</p>
+          ) : (
+            <ItemDisplay
+              items={sortedItems}
+              setCurItem={setCurItem}
+              removeItem={item =>
+                setDisplayedItems(prev => prev.filter(i => i.id !== item.id))
+              }
+              isOnMobile={onMobile}
+            />
+          )}
         </>
       )}
     </div>

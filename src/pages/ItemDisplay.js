@@ -1,55 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { arrayUnion, arrayRemove, updateDoc, doc, query, collection, where, getDocs, deleteDoc } from "firebase/firestore";
 import { db, auth, provider} from "../firebase-config";
 import { getStorage, ref, deleteObject } from "firebase/storage";
 
 
 const ItemDisplay = ({ isAuth, items, setCurItem, removeItem, isOnMobile }) => {
-    const [sortedItems, setSortedItems] = useState({
-        hats: [],
-        jackets: [],
-        tops: [],
-        bottoms: [],
-        shoes: [],
-        accessories: [],
-        other: [],
-    });
-    const [isSorted, setIsSorted] = useState(false);
     const [hoveredItemId, setHoveredItemId] = useState(null);
     const storage = getStorage();
 
-
-    useEffect(() => {
-        if (items.length > 0) {
-            const s = sortPrefItems(items);
-            setSortedItems(s);
-            setIsSorted(true); // Set isSorted to true when items are sorted
-        }
-    }, [items]); // Trigger effect when items change
-
-    const sortPrefItems = (items) => {
-        const sorted = {
-            hats: [],
-            jackets: [],
-            tops: [],
-            bottoms: [],
-            shoes: [],
-            accessories: [],
-            other: [],
-        };
-
-        sorted.hats = items.filter(item => item.type === "Hat" && item.title !== "No Hat");
-        sorted.jackets = items.filter(item => item.type === "Jacket" && item.title !== "No Jacket");
-        sorted.tops = items.filter(item => item.type === "Top");
-        sorted.bottoms = items.filter(item => item.type === "Bottoms");
-        sorted.shoes = items.filter(item => item.type === "Shoes");
-        sorted.accessories = items.filter(item => item.type === "Accessory" && item.title !== "No Accessory");
-        sorted.other = items.filter(item => item.type === "");
-        console.log(items);
-
-        return sorted;
-    };
-
+        
     const handleMouseEnter = (id) => {
         setHoveredItemId(id);
     };
@@ -119,29 +78,34 @@ const ItemDisplay = ({ isAuth, items, setCurItem, removeItem, isOnMobile }) => {
         </div>
     );
 
+        const totalItems =
+    items.hats.length +
+    items.jackets.length +
+    items.tops.length +
+    items.bottoms.length +
+    items.shoes.length +
+    items.accessories.length +
+    items.other.length;
+
+
     return (
-        <div>
-            {isSorted ? (
-                <div id='itemDisplay'>
-                    {items.length > 0 && (
-                        <div>
-                            {renderItems(sortedItems.hats, 'Hats')}
-                            {renderItems(sortedItems.jackets, 'Jackets')}
-                            {renderItems(sortedItems.tops, 'Tops')}
-                            {renderItems(sortedItems.bottoms, 'Bottoms')}
-                            {renderItems(sortedItems.shoes, 'Shoes')}
-                            {renderItems(sortedItems.accessories, 'Accessories')}
-                            {renderItems(sortedItems.other, 'Unorganized Items')}
-                        </div>
-                    )}
-                </div>
-            ) : (
-                <div>
-                    <p>Upload some Items!</p>
-                </div>
-            )}
+    <div>
+        {totalItems > 0 ? (
+        <div id='itemDisplay'>
+            {items.other.length > 0 ? renderItems(items.other, 'Unorganized Items') : null}
+            {renderItems(items.hats, 'Hats')}
+            {renderItems(items.jackets, 'Jackets')}
+            {renderItems(items.tops, 'Tops')}
+            {renderItems(items.bottoms, 'Bottoms')}
+            {renderItems(items.shoes, 'Shoes')}
+            {renderItems(items.accessories, 'Accessories')}
         </div>
+        ) : (
+        <p>Upload some Items!</p>
+        )}
+    </div>
     );
+
 };
 
 export default ItemDisplay;

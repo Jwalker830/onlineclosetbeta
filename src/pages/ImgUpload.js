@@ -8,7 +8,7 @@ import moment from "moment";
 
 preload();
 
-const ImgUpload = ({ addItemList }) => {
+const ImgUpload = ({ addItemList, onUploadStart, onUploadComplete }) => {
   const [files, setFiles] = useState([]);
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
@@ -33,15 +33,20 @@ const ImgUpload = ({ addItemList }) => {
 
     setUploading(true);
     setProgress(0);
+    progressRef.current = { transferred: 0, total: 0 };
+    onUploadStart?.();
 
     try {
       const results = await Promise.all(files.map(processAndUpload));
       await commitToFirestore(results);
-      results.forEach(addItemList); // ✅ immediate UI update
+      addItemList(results) // ✅ immediate UI update
+      setFiles([]);
+      setFileNameText("Click to upload a garment");
     } catch (err) {
       console.error("Upload failed:", err);
     } finally {
       setUploading(false);
+      onUploadComplete?.();
     }
   };
 
@@ -83,6 +88,8 @@ const ImgUpload = ({ addItemList }) => {
       id,
       imgURL,
       ...colors,
+      type: "", 
+      title: "", 
       owner: auth.currentUser.uid,
     };
   };
