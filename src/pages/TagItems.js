@@ -1,56 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { auth } from "../firebase-config";
-import GetUserItems from './GetUserItems';
-import TagField from './TagField';
-import ItemDisplay from './ItemDisplay';
-import ImgUpload from './ImgUpload';
+import GetUserItems from "./GetUserItems";
+import TagField from "./TagField";
+import ItemDisplay from "./ItemDisplay";
+import ImgUpload from "./ImgUpload";
 
 const TagItems = ({ isAuth }) => {
     const [displayedItems, setDisplayedItems] = useState([]);
-    const [sortedItems, setSortedItems] = useState([]);
     const [curIndex, setCurIndex] = useState();
     const [curItem, setCurItem] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [onMobile, setOnMobile] = useState(() => {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      });
-      
-    const sortItems = (items) => {
-        let sorted = [
-            ...(items.filter(item => item.type === "Hat")),
-            ...(items.filter(item => item.type === "Jacket")),
-            ...(items.filter(item => item.type === "Top")),
-            ...(items.filter(item => item.type === "Bottoms")),
-            ...(items.filter(item => item.type === "Shoes")),
-            ...(items.filter(item => item.type === "Accessory")),
-            ...(items.filter(item => item.type === ""))
-        ];
 
-        const filteredItems = sorted.filter(item => item.id !== "000" && item.id !== "001" && item.id !== "002");
+  const onMobile = useMemo(
+    () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent),
+    []
+  );
 
-        return filteredItems;
-    };
+  const sortItems = (items) => [
+    ...items.filter(i => i.type === "Hat"),
+    ...items.filter(i => i.type === "Jacket"),
+    ...items.filter(i => i.type === "Top"),
+    ...items.filter(i => i.type === "Bottoms"),
+    ...items.filter(i => i.type === "Shoes"),
+    ...items.filter(i => i.type === "Accessory"),
+    ...items.filter(i => !i.type),
+  ].filter(i => !["000","001","002"].includes(i.id));
 
-    useEffect(() => {
-        let sorted = sortItems(displayedItems);
-        setSortedItems(sorted);
-    }, [displayedItems]);
+  const sortedItems = useMemo(
+    () => sortItems(displayedItems),
+    [displayedItems]
+  );
 
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                setLoading(false); // Set loading to false once auth.currentUser is loaded
-            }
-        });
+  useEffect(() => {
+    return auth.onAuthStateChanged(user => {
+      if (user) setLoading(false);
+    });
+  }, []);
 
-        return () => unsubscribe();
-    }, []);
+  const addToItemList = (item) => {
+    setDisplayedItems(prev => [...prev, item]);
+  };
 
-    const addToItemList = (newItem) => {
-        const newList = [...displayedItems, newItem];
-        setDisplayedItems(newList);
-    };
+  const mergeItemList = (items) => {
+    setDisplayedItems(prev => {
+      const map = new Map(prev.map(i => [i.id, i]));
+      items.forEach(i => map.set(i.id, i));
+      return Array.from(map.values());
+    });
+  };
 
     const updateItemList = (newItemList) => {
         setDisplayedItems(newItemList);
@@ -72,22 +70,31 @@ const TagItems = ({ isAuth }) => {
         return <p>Loading...</p>; // You can customize this loading message or component
     }
 
-    return (
-        <div id='itemDisplay'>
-            <GetUserItems setItemList={updateItemList} id={auth.currentUser.uid} />
-            {curItem === null ? (
-                <>
-                    <div className='topRow'>
-                        <ImgUpload addItemList={addToItemList} />
-                        <Link to="/swipe">Score random outfits</Link>
-                    </div>
-                    <ItemDisplay items={displayedItems} setCurItem={updateCurItem} removeItem={handleRemoveItem} isOnMobile={onMobile}/>
-                </>
-            ) : (
-                <TagField item={curItem} setCurItem={updateCurItem} index={sortedItems.indexOf(curItem)} itemArray={sortedItems} setCurIndex={updateCurIndex} isOnMobile={onMobile}/>
-            )}
-        </div>
-    );
+  return (
+    <div id="itemDisplay">
+      <GetUserItems setItemList={mergeItemList} id={auth.currentUser.uid} />
+
+      {curItem ? (
+            <TagField item={curItem} setCurItem={updateCurItem} index={sortedItems.indexOf(curItem)} itemArray={sortedItems} setCurIndex={updateCurIndex} isOnMobile={onMobile}/>
+      ) : (
+        <>
+          <div className="topRow">
+            <ImgUpload addItemList={addToItemList} />
+            <Link to="/swipe">Score random outfits</Link>
+          </div>
+
+          <ItemDisplay
+            items={sortedItems}
+            setCurItem={setCurItem}
+            removeItem={item =>
+              setDisplayedItems(prev => prev.filter(i => i.id !== item.id))
+            }
+            isOnMobile={onMobile}
+          />
+        </>
+      )}
+    </div>
+  );
 };
 
 export default TagItems;
