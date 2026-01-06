@@ -22,8 +22,6 @@ const genCode = (len = 8) => {
     for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
     return out;
 };
-
-// same helper your randomizeFit uses
 const getRandomItems = (array, amt) => {
     if (!array || array.length === 0) return [];
     const picked = new Set();
@@ -66,6 +64,8 @@ function GeneratePackingList() {
     const [days, setDays] = useState(1);
     const [minimal, setMinimal] = useState(false);
     const [packingList, setPackingList] = useState(null);
+    const [showNamePopup, setShowNamePopup] = useState(false);
+    const [closetName, setClosetName] = useState("");
 
     /* stop the loading screen when the closet arrives ------------------ */
     useEffect(() => { if (displayedItems.length) setLoading(false); },
@@ -115,6 +115,9 @@ function GeneratePackingList() {
 
     /* --------------------- main algorithm ----------------------------- */
     const generatePackingList = () => {
+        // Exclude special placeholder items
+        const validItems = displayedItems.filter(item => !["000", "001", "002"].includes(item.id));
+
         /* -------- how many of each type do we need? -------- */
         const need = minimal
             ? MIN_TABLE[Math.min(days, 10)]
@@ -124,10 +127,10 @@ function GeneratePackingList() {
             };
 
         /* -------- treat every locked item as a base item --- */
-        let baseItemsList = displayedItems.filter(it => locked[it.id]);  // <- new array
+        let baseItemsList = validItems.filter(it => locked[it.id]);  // <- new array
 
         if (baseItemsList.length === 0) {
-            const [randItem] = getRandomItems(displayedItems, 1); // destructure first elem
+            const [randItem] = getRandomItems(validItems, 1); // destructure first elem
             if (randItem) baseItemsList.push(randItem);
         }
 
@@ -157,7 +160,7 @@ function GeneratePackingList() {
 
         /* -------- score every item exactly as before ------- */
         const candidatePool = [];
-        displayedItems.forEach(item => {
+        validItems.forEach(item => {
             let score = 0;
             item.tags?.forEach(tag => {
                 if (dislikeTags.has(tag)) score -= 2;
@@ -221,6 +224,15 @@ function GeneratePackingList() {
     /* packing list saver ----------------------------------------------- */
     const savePackingList = async () => {
         if (!packingList) return;
+        setShowNamePopup(true);
+    };
+
+    const confirmSave = async () => {
+        const name = closetName.trim();
+        if (!name) return;
+
+        const code = genCode();
+
 
         // 1. create the “monster string” (𝒏 × 10-char ids concatenated)
         const allIds = Object.values(packingList)
@@ -228,28 +240,24 @@ function GeneratePackingList() {
             .map(it => it.id)            // keep only the 10-char id
             .join("");                   // → single big string
 
-        // 2. generate a unique 8-char document id
-        let code = genCode(8);
-        while (await getDoc(doc(db, "closets", code)).then(s => s.exists())) {
-            code = genCode(8);             // extremely unlikely to loop > once
-        }
-
         // 3. write the document (field name = "items", but you can choose any)
         await setDoc(doc(db, "closets", code), { items: allIds });
 
         const userRef = doc(db, "users", auth.currentUser.uid);
         await updateDoc(userRef, {
-            subclosets: arrayUnion(code)
+            subclosets: arrayUnion({id: code, name: name})
         }).catch(async err => {
         // if the user doc doesn't exist yet, create it with the array
         if (err.code === "not-found") {
-        await setDoc(userRef, { subclosets: [code] }, { merge: true });
+        await setDoc(userRef, { subclosets: [{id: code, name: name}] }, { merge: true });
             } else {
                 throw err;
             }
         });
 
-        alert(`Packing list saved!\nShareable url: ${window.location.origin}/closet/${code}`);
+        alert(`Packing list "${name}" saved!\nShareable url: ${window.location.origin}/closet/${code}`);
+        setShowNamePopup(false);
+        setClosetName("");
     };
 
     /* item-scoring helper ---------------------------------------------- */
@@ -316,7 +324,7 @@ function GeneratePackingList() {
         </div>
     );
 
-    const sortedForDisplay = sortPrefItems(displayedItems);
+    const sortedForDisplay = sortPrefItems(displayedItems.filter(item => !["000", "001", "002"].includes(item.id)));
 
     // place it above the return (inside the component)
     const renderArticleDisplay = (catName, arr) => (
@@ -367,7 +375,7 @@ function GeneratePackingList() {
                         Generate
                     </button>
                     &nbsp;&nbsp;
-                    {locked !== {} && (
+                    {Object.keys(locked).length > 0 && (
                         <button onClick={() => { setLocked({}) }}>
                             Clear Selections
                         </button>
@@ -392,6 +400,32 @@ function GeneratePackingList() {
                 {renderArticleDisplay("shoes", sortedForDisplay.shoes)}
                 {renderArticleDisplay("accessories", sortedForDisplay.accessories)}
             </div>
+            {showNamePopup && (
+                <div style={{
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    color: 'white',
+                    padding: '20px',
+                    borderRadius: '10px',
+                    zIndex: 1000,
+                    textAlign: 'center'
+                }}>
+                    <h3>Enter a name for your packing list</h3>
+                    <input
+                        type="text"
+                        value={closetName}
+                        onChange={(e) => setClosetName(e.target.value)}
+                        placeholder="Packing list name"
+                        style={{ margin: '10px 0', padding: '5px' }}
+                    />
+                    <br />
+                    <button onClick={confirmSave} style={{ margin: '5px' }}>Save</button>
+                    <button onClick={() => { setShowNamePopup(false); setClosetName(""); }} style={{ margin: '5px' }}>Cancel</button>
+                </div>
+            )}
         </div>
     );
 }

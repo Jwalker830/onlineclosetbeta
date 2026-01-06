@@ -147,11 +147,11 @@ const DisplayFit = ({ fit, fitCode, removeFit, width, curUser }) => {
             }
         } else {
             try {
+                setIsFav(false);
+                if (removeFit) removeFit(curFit);
                 await updateDoc(doc(db, "users", auth.currentUser.uid), {
                     favFits: arrayRemove(displayFitCode)
                 });
-                setIsFav(false);
-                if (removeFit) removeFit(displayFitCode);
             } catch (error) {
                 console.error("Error removing favorite status: ", error);
             }

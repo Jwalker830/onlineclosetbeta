@@ -91,7 +91,9 @@ const TagItems = ({ isAuth }) => {
       <GetUserItems setItemList={mergeItemList} id={auth.currentUser.uid} />
 
       {curItem ? (
-            <TagField item={curItem} setCurItem={updateCurItem} index={flatItems.findIndex(i => i.id === curItem.id)} itemArray={sortedItems} setCurIndex={updateCurIndex} isOnMobile={onMobile}/>
+            <TagField item={curItem} setCurItem={updateCurItem} itemArray={displayedItems} setCurIndex={updateCurIndex} isOnMobile={onMobile} updateItem={(updatedItem) => {
+              setDisplayedItems(prev => prev.map(i => i.id === updatedItem.id ? updatedItem : i));
+            }}/>
       ) : (
         <>
           <div className="topRow">

@@ -9,21 +9,21 @@ import AutoTag from './AutoTag';  // Adjust the import path as needed
 
 
 
-const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile }) => {
+const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile, updateItem }) => {
     const [itemTitle, setItemTitle] = useState("");
     const [itemDesc, setItemDesc] = useState("");
     const [itemTags, setItemTags] = useState("");
     const [itemDisplay, setItemDisplay] = useState(item);
     const [itemType, setItemType] = useState("");
     const [itemImage, setItemImage] = useState("");
+    const [imageFile, setImageFile] = useState(null);
     const [newImage, setNewImage] = useState("");
     const [itemPrimary, setItemPrimary] = useState("");
     const [itemSecondary, setItemSecondary] = useState ("");
     const [fileNameText, setFileNameText] = useState("Click to upload a new image");
-    const [imageFile, setImageFile] = useState(null);
-    var namer = require('color-namer')
-    const storage = getStorage();
+    const [showSavedPopup, setShowSavedPopup] = useState(false);
     const inputRef = useRef(null);
+    const storage = getStorage();
     let navigate = useNavigate();
 
     useEffect(() => {
@@ -74,7 +74,7 @@ const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile 
     }
 
     const changeInfo = async () => {
-        itemArray[index] = {
+        const updatedItem = {
             ...itemDisplay,
             title: itemTitle,
             desc: itemDesc,
@@ -85,27 +85,35 @@ const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile 
             secondaryColor: itemSecondary
         };
         console.log(itemPrimary);
-        await setDoc(doc(db, 'clothing', itemDisplay.id), itemArray[index]);
+        await setDoc(doc(db, 'clothing', itemDisplay.id), updatedItem);
         console.log("saved!");
+        updateItem(updatedItem);
+        setShowSavedPopup(true);
+        setTimeout(() => setShowSavedPopup(false), 3000); // Hide after 3 seconds
     }
 
-    const changeItem = (newIndex) => {
-        if (newIndex >= 0 && newIndex < itemArray.length) {
-            setCurIndex(newIndex);
-            const newItem = itemArray[newIndex];
-            setCurItem(newItem);
-            setItemDisplay(newItem);
-            setItemTitle(newItem.title);
-            setItemDesc(newItem.desc);
-            setItemTags(newItem.tags.join(", "));
-            setItemType(newItem.type);
-            setItemPrimary(newItem.primaryColor ? newItem.primaryColor : convertColor("rgb(0, 0, 0)"));
-            setItemSecondary(newItem.secondaryColor ? newItem.secondaryColor : convertColor("rgb(0, 0, 0)"));
-        } else {
+    const changeItem = (direction) => {
+        if (direction === -2) {
             setCurIndex(null);
             setCurItem(null);
             setItemDisplay(null);
+            return;
         }
+        if (itemArray.length === 0) return;
+        const currentIndex = itemArray.findIndex(i => i.id === itemDisplay.id);
+        if (currentIndex === -1) return;
+        const newIndex = (currentIndex + direction + itemArray.length) % itemArray.length;
+        const newItem = itemArray[newIndex];
+        if (!newItem) return;
+        setCurIndex(newIndex);
+        setCurItem(newItem);
+        setItemDisplay(newItem);
+        setItemTitle(newItem.title);
+        setItemDesc(newItem.desc);
+        setItemTags(newItem.tags.join(", "));
+        setItemType(newItem.type);
+        setItemPrimary(newItem.primaryColor ? newItem.primaryColor : convertColor("rgb(0, 0, 0)"));
+        setItemSecondary(newItem.secondaryColor ? newItem.secondaryColor : convertColor("rgb(0, 0, 0)"));
     }
 
     const handleImagesChange = (e) => {
@@ -171,6 +179,8 @@ const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile 
                                 getDownloadURL(uploadTask.snapshot.ref).then((imgURL) => {
                                     setItemImage(imgURL);
                                     console.log(itemImage);
+                                    const updatedItem = { ...itemDisplay, imgURL };
+                                    updateItem(updatedItem);
                                 }).catch((error) => {
                                     console.error('Error getting download URL:', error);
                                 });
@@ -273,9 +283,9 @@ const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile 
                 </div>
                 <div className="details-container">
                     <div className="button-container">
-                        <button onClick={() => { changeItem((index - 1 + itemArray.length) % itemArray.length) }}>←</button>
-                        <button onClick={() => { changeItem(-1); setItemDisplay(null); }}>x</button>
-                        <button onClick={() => { changeItem((index + 1) % itemArray.length) }}>→</button>
+                        <button onClick={() => { changeItem(-1) }}>←</button>
+                        <button onClick={() => { changeItem(-2) }}>x</button>
+                        <button onClick={() => { changeItem(1) }}>→</button>
                     </div>
                     <div className="input-container">
                         <label htmlFor="title">Title:</label>
@@ -330,6 +340,22 @@ const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile 
                     </div>
                     <button type="submit" onClick={changeInfo}>Save</button>
                 </div>
+                {showSavedPopup && (
+                    <div style={{
+                        position: 'fixed',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        color: 'white',
+                        padding: '20px',
+                        borderRadius: '10px',
+                        zIndex: 1000,
+                        textAlign: 'center'
+                    }}>
+                        <p>Information saved successfully!</p>
+                    </div>
+                )}
             </div>
         )
     );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from "../firebase-config";
-import { query, collection, where, getDocs, doc, updateDoc } from "firebase/firestore";
+import { query, collection, where, getDocs } from "firebase/firestore";
 import { updateStatsLogic } from './UpdateStats';
 import DisplayFit from './DisplayFit';
 
@@ -83,8 +83,9 @@ const FavFits = ({ isAuth }) => {
                 }));
             }));
 
-            let fits = Array.from(fitSet)
-            setFavFits(fits);
+            let fits = Array.from(fitSet);
+            let fitsWithCodes = await Promise.all(fits.map(async f => ({ ...f, code: await genFitCode(f) })));
+            setFavFits(fitsWithCodes);
 
         } catch (error) {
             console.error("Error fetching items:", error);
@@ -140,8 +141,7 @@ const FavFits = ({ isAuth }) => {
     }
 
     const handleRemoveFit = (fit) => {
-        setFavFits((prevItems) => prevItems.filter((f) => f === fit));
-        console.log(favFits);
+        setFavFits((prevItems) => prevItems.filter((f) => f.code !== fit.code));
     }
 
     return (
@@ -149,7 +149,7 @@ const FavFits = ({ isAuth }) => {
             {favFits.length > 0 ? (
                 <div className='favFitsContainer'>
                     {favFits.map((fit) => (
-                        <DisplayFit key={fit} fit={fit} removeFit={handleRemoveFit} curUser={true}/>
+                        <DisplayFit key={fit.code} removeFit={handleRemoveFit} fit={fit} curUser={true}/>
                     ))}
                 </div>
             ) : (

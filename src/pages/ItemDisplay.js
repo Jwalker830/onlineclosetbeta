@@ -91,7 +91,7 @@ const ItemDisplay = ({ isAuth, items, setCurItem, removeItem, isOnMobile }) => {
     return (
     <div>
         {totalItems > 0 ? (
-        <div id='itemDisplay'>
+        <div id='itemDisplay' style={{ display: 'flex', flexDirection: 'column' }}>
             {items.other.length > 0 ? renderItems(items.other, 'Unorganized Items') : null}
             {renderItems(items.hats, 'Hats')}
             {renderItems(items.jackets, 'Jackets')}

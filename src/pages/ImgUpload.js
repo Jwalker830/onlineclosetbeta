@@ -90,6 +90,8 @@ const ImgUpload = ({ addItemList, onUploadStart, onUploadComplete }) => {
       ...colors,
       type: "", 
       title: "", 
+      tags: [],
+      desc: "",
       owner: auth.currentUser.uid,
     };
   };

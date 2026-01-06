@@ -26,6 +26,7 @@ function Closet({ isAuth }) {
     const [hoveredItem, setHoveredItem] = useState(null);
     const [selectedCloset, setSelectedCloset] = useState("");
     const [subClosets, setSubClosets] = useState([]);
+    const [showInvalidPopup, setShowInvalidPopup] = useState(false);
     const [lockedItems, setLockedItems] = useState(() => {
         if(localStorage.getItem("curFit")){
             let c = JSON.parse(localStorage.getItem("curFit"));
@@ -170,9 +171,35 @@ function Closet({ isAuth }) {
     useEffect(() => {
         if (userItems && userItems.length > 0) {
             const sorted = sortUserItems();
-            setSortedItems(sorted);
+            if (selectedCloset && (sorted.tops.length < 1 || sorted.bottoms.length < 1 || sorted.shoes.length < 1)) {
+                setSortedItems(null); // Prevent showing invalid closet
+                setShowInvalidPopup(true);
+                // Delete the invalid subcloset
+                const deleteInvalidCloset = async () => {
+                    try {
+                        await deleteDoc(doc(db, "closets", selectedCloset));
+                        const uid = currentID || auth.currentUser.uid;
+                        const toRemove = subClosets.find(c => c.id === selectedCloset);
+                        if (toRemove) {
+                            await updateDoc(doc(db, "users", uid), {
+                                subclosets: arrayRemove(toRemove)
+                            });
+                        }
+                        setSubClosets(prev => prev.filter(c => c.id !== selectedCloset));
+                        setSelectedCloset("");
+                        setShowInvalidPopup(false);
+                        navigate("/" + uid);
+                    } catch (err) {
+                        console.error("Failed to delete invalid closet:", err);
+                        setShowInvalidPopup(false);
+                    }
+                };
+                deleteInvalidCloset();
+            } else {
+                setSortedItems(sorted);
+            }
         }
-    }, [userItems]);
+    }, [userItems, selectedCloset, currentID, navigate]);
 
     useEffect(() => {
         if (!currentID) return;
@@ -180,7 +207,18 @@ function Closet({ isAuth }) {
         // read once; if you want live updates use onSnapshot instead
         getDoc(doc(db, "users", currentID)).then(snap => {
             if (snap.exists()) {
-                setSubClosets(snap.data().subclosets || []);
+                let closets = snap.data().subclosets;
+                if (!Array.isArray(closets)) {
+                    closets = [];
+                } else {
+                    if (closets.length > 0 && typeof closets[0] === 'string') {
+                        // old format, convert
+                        closets = closets.map(code => ({id: code, name: code}));
+                        // update the doc
+                        updateDoc(doc(db, "users", currentID), { subclosets: closets });
+                    }
+                }
+                setSubClosets(closets);
             } else {
                 setSubClosets([]);            // no document yet → empty array
             }
@@ -206,11 +244,13 @@ function Closet({ isAuth }) {
 
         
         if(sorted.tops.length < 1 || sorted.bottoms.length < 1 || sorted.shoes.length < 1){
-            if (isAuth) {
-                navigate("/tagitems");
-            }
-            else {
-                navigate("/search");
+            if (!selectedCloset) {
+                if (isAuth) {
+                    navigate("/tagitems");
+                }
+                else {
+                    navigate("/search");
+                }
             }
         }
 
@@ -453,7 +493,7 @@ function Closet({ isAuth }) {
         }
 
         const ok = window.confirm(
-            `Permanently delete sub-closet “${selectedCloset}”?`
+            `Permanently delete sub-closet "${subClosets.find(c => c.id === selectedCloset)?.name || selectedCloset}"?`
         );
         if (!ok) return;
 
@@ -463,12 +503,15 @@ function Closet({ isAuth }) {
 
             /* 2️⃣  remove the code from the user’s subclosets array */
             const uid = currentID || auth.currentUser.uid;
-            await updateDoc(doc(db, "users", uid), {
-                subclosets: arrayRemove(selectedCloset)
-            });
+            const toRemove = subClosets.find(c => c.id === selectedCloset);
+            if (toRemove) {
+                await updateDoc(doc(db, "users", uid), {
+                    subclosets: arrayRemove(toRemove)
+                });
+            }
 
             /* 3️⃣  update local state / UI */
-            setSubClosets(prev => prev.filter(code => code !== selectedCloset));
+            setSubClosets(prev => prev.filter(c => c.id !== selectedCloset));
             setSelectedCloset("");        // back to default garments
             navigate("/" + uid);
 
@@ -499,8 +542,8 @@ function Closet({ isAuth }) {
                                 }
                             }}>
                             <option value="">Default garments</option>
-                            {subClosets.map(code => (
-                                <option key={code} value={code}>{code}</option>
+                            {subClosets.filter(closet => typeof closet === 'object' && closet.id && closet.name && typeof closet.name === 'string').map(closet => (
+                                <option key={closet.id} value={closet.id}>{closet.name}</option>
                             ))}
                         </select>
  
@@ -669,6 +712,22 @@ function Closet({ isAuth }) {
 
                     }
                  </>
+            )}
+            {showInvalidPopup && (
+                <div style={{
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    color: 'white',
+                    padding: '20px',
+                    borderRadius: '10px',
+                    zIndex: 1000,
+                    textAlign: 'center'
+                }}>
+                    <p>The subcloset is invalid and has been deleted.</p>
+                </div>
             )}
         </div>
     );    
