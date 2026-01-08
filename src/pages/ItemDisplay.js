@@ -6,6 +6,8 @@ import { getStorage, ref, deleteObject } from "firebase/storage";
 
 const ItemDisplay = ({ isAuth, items, setCurItem, removeItem, isOnMobile }) => {
     const [hoveredItemId, setHoveredItemId] = useState(null);
+    const [showDeletePopup, setShowDeletePopup] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
     const storage = getStorage();
 
         
@@ -17,9 +19,15 @@ const ItemDisplay = ({ isAuth, items, setCurItem, removeItem, isOnMobile }) => {
         setHoveredItemId(null);
     };
 
-    const handleRemoveItem = async (item) => {
+    const handleRemoveItem = (item) => {
+        setItemToDelete(item);
+        setShowDeletePopup(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!itemToDelete) return;
         try {
-            const imageRef = ref(storage, item.id);
+            const imageRef = ref(storage, itemToDelete.id);
             deleteObject(imageRef).then(() => {
                 console.log("deleted")
               }).catch((error) => {
@@ -34,7 +42,7 @@ const ItemDisplay = ({ isAuth, items, setCurItem, removeItem, isOnMobile }) => {
     
             // Remove the item from favFits array
             await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                favFits: arrayRemove(item.id)
+                favFits: arrayRemove(itemToDelete.id)
             });
 
             // Also remove any outfits that contain this item
@@ -43,18 +51,21 @@ const ItemDisplay = ({ isAuth, items, setCurItem, removeItem, isOnMobile }) => {
             if (userSnap.exists()) {
                 const currentFavFits = userSnap.data().favFits || [];
                 // Pad the item ID to 10 characters for fit code matching
-                const paddedId = item.id.length < 10 ? "0000000000".slice(0, 10 - item.id.length) + item.id : item.id;
+                const paddedId = itemToDelete.id.length < 10 ? "0000000000".slice(0, 10 - itemToDelete.id.length) + itemToDelete.id : itemToDelete.id;
                 const filteredFavFits = currentFavFits.filter(fitCode => !fitCode.includes(paddedId));
                 await updateDoc(userRef, { favFits: filteredFavFits });
             }
 
-            removeItem(item);
+            removeItem(itemToDelete);
 
-            await deleteDoc(doc(db, "clothing", item.id));
+            await deleteDoc(doc(db, "clothing", itemToDelete.id));
         } catch (error) {
             console.error("Error fetching items:", error);
+        } finally {
+            setShowDeletePopup(false);
+            setItemToDelete(null);
         }
-    }
+    };
 
     const renderItems = (items, title) => (
         <div className='typeContainer'>
@@ -114,6 +125,25 @@ const ItemDisplay = ({ isAuth, items, setCurItem, removeItem, isOnMobile }) => {
         </div>
         ) : (
         <p>Upload some Items!</p>
+        )}
+        {showDeletePopup && (
+            <div style={{
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                color: 'white',
+                padding: '20px',
+                borderRadius: '10px',
+                zIndex: 1000,
+                textAlign: 'center'
+            }}>
+                <h3>Delete Item</h3>
+                <p>Are you sure you want to delete this item? This action cannot be undone.</p>
+                <button onClick={confirmDelete} style={{ margin: '5px' }}>Delete</button>
+                <button onClick={() => { setShowDeletePopup(false); setItemToDelete(null); }} style={{ margin: '5px' }}>Cancel</button>
+            </div>
         )}
     </div>
     );
