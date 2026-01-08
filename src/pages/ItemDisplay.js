@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { arrayUnion, arrayRemove, updateDoc, doc, query, collection, where, getDocs, deleteDoc } from "firebase/firestore";
+import { arrayUnion, arrayRemove, updateDoc, doc, query, collection, where, getDocs, deleteDoc, getDoc } from "firebase/firestore";
 import { db, auth, provider} from "../firebase-config";
 import { getStorage, ref, deleteObject } from "firebase/storage";
 
@@ -32,9 +32,21 @@ const ItemDisplay = ({ isAuth, items, setCurItem, removeItem, isOnMobile }) => {
                 return;
             }
     
+            // Remove the item from favFits array
             await updateDoc(doc(db, "users", auth.currentUser.uid), {
                 favFits: arrayRemove(item.id)
             });
+
+            // Also remove any outfits that contain this item
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+                const currentFavFits = userSnap.data().favFits || [];
+                // Pad the item ID to 10 characters for fit code matching
+                const paddedId = item.id.length < 10 ? "0000000000".slice(0, 10 - item.id.length) + item.id : item.id;
+                const filteredFavFits = currentFavFits.filter(fitCode => !fitCode.includes(paddedId));
+                await updateDoc(userRef, { favFits: filteredFavFits });
+            }
 
             removeItem(item);
 
