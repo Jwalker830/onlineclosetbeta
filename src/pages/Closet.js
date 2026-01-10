@@ -485,6 +485,48 @@ function Closet({ isAuth }) {
         }
     }
 
+    const genFitCode = async (curFit) => {
+        if (!curFit) return;
+        let fitCode = "";
+        console.log("curFit:", curFit);
+        let keys = Object.keys(curFit);
+
+        keys.forEach((key) => {
+            const item = curFit[key];
+
+            if (key === "accessories" && Array.isArray(item) && item.length > 0) {
+                fitCode += "--";
+                item.forEach((obj) => {
+                    if (obj.id) {
+                        if (obj.id.length < 10) {
+                            fitCode += ("0000000" + obj.id);
+                        } else {
+                            fitCode += obj.id;
+                        }
+                    } else {
+                        console.error(`Missing id in Accessories object:`, obj);
+                    }
+                });
+                fitCode += "--";
+            } else if (key === "accessories" && Array.isArray(item) && item.length === 0) {
+                fitCode += "----";
+            }
+
+            if (item && item.id && key !== "accessories") {
+                if (item.id.length < 10) {
+                    fitCode += ("0000000" + item.id);
+                } else {
+                    fitCode += item.id;
+                }
+            } else {
+                console.error(`Invalid or missing 'id' for key '${key}':`, item);
+            }
+        });
+
+        console.log("Generated fitCode:", fitCode);
+        return (fitCode);
+    };
+
     const deleteCloset = async () => {
         // nothing selected or trying to delete the default wardrobe
         if (!selectedCloset) {
@@ -519,6 +561,13 @@ function Closet({ isAuth }) {
         } catch (err) {
             console.error("Failed to delete closet:", err);
             alert("Something went wrong – closet not deleted.");
+        }
+    };
+
+    const matchFit = async () => {
+        const fitCode = await genFitCode(curFit);
+        if (fitCode) {
+            navigate(`/matchfit/${fitCode}`);
         }
     };
 
@@ -629,6 +678,7 @@ function Closet({ isAuth }) {
                         </div>
                     </div>
                     <div className="midCloset scroll-container">
+                        {curFit && <button onClick={matchFit} style={{ marginBottom: '10px' }}>Match This Fit</button>}
                             <GenerateFit userItems={userItems} passFit={curFit} setNewFit={loadCurFit} baseItems={lockedItems} clearLockedItems={clearLocked} id={currentID} date={date} logging={logging}/>
                     </div>
                     <div className="rightCloset scroll-container">

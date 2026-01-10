@@ -16,6 +16,7 @@ import About from './pages/About.js';
 import LogField from './pages/LogField.js';
 import ViewLog from './pages/ViewLog.js';
 import GeneratePackingList from './pages/GeneratePackingList';
+import MatchFit from './pages/MatchFit.js';
 
 function App() {
     const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth"));
@@ -98,6 +99,7 @@ function App() {
                     <Route path="/feed" element={<Feed isAuth={isAuth} />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/createlog" element={<LogField />} />
+                    <Route path="/matchfit/:fitcode" element={<MatchFit isAuth={isAuth} />} />
                 </Routes>
             </div>
         </Router>

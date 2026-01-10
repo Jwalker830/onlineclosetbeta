@@ -1,15 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import { db, auth } from "../firebase-config";
-import { query, collection, where, getDocs } from "firebase/firestore";
+import { query, collection, where, getDocs, updateDoc, doc } from "firebase/firestore";
 
 const GetUserItems = ({ setItemList, id }) => {
     const hasRunOnce = useRef(false);
 
     useEffect(() => {
         if (id && !hasRunOnce.current) {
-            console.log(id);
+            console.log("[GetUserItems] id prop received:", id);
             getItems();
             hasRunOnce.current = true;
+        } else if (!id) {
+            console.warn("[GetUserItems] No id prop received!");
         }
     }, [id]);
 
@@ -33,6 +35,18 @@ const GetUserItems = ({ setItemList, id }) => {
             }));
 
             setItemList(Array.from(itemsSet));
+
+            // Collect all unique tags from items
+            const allTags = new Set();
+            Array.from(itemsSet).forEach(item => {
+                if (item.tags && Array.isArray(item.tags)) {
+                    item.tags.forEach(tag => allTags.add(tag));
+                }
+            });
+
+            // Update the user's itemTags array
+            await updateDoc(doc(db, "users", id), { itemTags: Array.from(allTags) });
+            console.log("Updated itemTags for user:", Array.from(allTags));
         } catch (error) {
             console.error("Error fetching items:", error);
         }
