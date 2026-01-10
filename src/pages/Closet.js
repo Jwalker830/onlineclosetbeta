@@ -677,9 +677,14 @@ function Closet({ isAuth }) {
                             }
                         </div>
                     </div>
-                    <div className="midCloset scroll-container">
-                        {curFit && <button onClick={matchFit} style={{ marginBottom: '10px' }}>Match This Fit</button>}
+                    <div className="midCloset" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                        {/* Operational buttons and tag bar always visible above scrollable fit */}
+                        <div style={{ width: '100%', maxWidth: '500px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+                            {curFit && <button onClick={matchFit} className="rerollButton">Match This Fit</button>}
+                        </div>
+                        <div className="scroll-container" style={{ width: '100%', maxWidth: '500px', margin: '0 auto', overflowY: 'auto', flex: 1 }}>
                             <GenerateFit userItems={userItems} passFit={curFit} setNewFit={loadCurFit} baseItems={lockedItems} clearLockedItems={clearLocked} id={currentID} date={date} logging={logging}/>
+                        </div>
                     </div>
                     <div className="rightCloset scroll-container">
                         <div className="articleDisplay scroll-container">

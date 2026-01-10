@@ -70,6 +70,35 @@ function Profile({ isAuth }) {
     }, [paramProfileId]);
 
     useEffect(() => {
+        getUserItems(profileId);
+    }, [profileId]);
+
+    const getUserItems = async (profileId) => {
+            try {
+                console.log("getting items");
+    
+                const q = query(collection(db, "users"), where("id", "==", profileId));
+                const querySnapshot = await getDocs(q);
+                const itemsSet = new Set();
+    
+                await Promise.all(querySnapshot.docs.map(async (userDoc) => {
+                    const userData = userDoc.data();
+                    await Promise.all(userData.items.map(async (item) => {
+                        const b = query(collection(db, "clothing"), where("id", "==", item.id));
+                        const data = await getDocs(b);
+                        data.forEach((doc) => {
+                            itemsSet.add(doc.data());
+                        });
+                    }));
+                }));
+    
+                setItems(Array.from(itemsSet));
+            } catch (error) {
+                console.error("Error getting user data:", error);
+            }
+        };
+
+    useEffect(() => {
         if (auth.currentUser) {
             if (isAuth && profileId === auth.currentUser.uid) {
                 navigate("/profile/" + auth.currentUser.uid);
