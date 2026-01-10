@@ -1,3 +1,34 @@
+/* SwipeFits direction indicators and transitions */
+.swipeFitIndicators {
+  user-select: none;
+  margin-bottom: 10px;
+  padding: 0 10px;
+}
+
+.swipeFitContainer {
+  will-change: transform;
+  background: var(--color5);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  transition: transform 0.5s cubic-bezier(0.77,0,0.175,1), box-shadow 0.3s;
+  min-height: 350px;
+  max-width: 600px;
+  margin: auto;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 600px) {
+  .swipeFitIndicators {
+    width: 100vw;
+    font-size: 16px;
+  }
+  .swipeFitContainer {
+    width: 90vw;
+    min-height: 350px;
+    max-width: 95vw;
+  }
+}
 /* Reroll button for MatchFit */
 .rerollButton {
   font-size: 15px;

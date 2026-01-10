@@ -20,9 +20,10 @@ const SwipeFits = ({ isAuth }) => {
     const [combos, setCombos] = useState([]);
     const [comboPrefs, setComboPrefs] = useState({});
     const [slideDirection, setSlideDirection] = useState(null);
+    const [isTransitioning, setIsTransitioning] = useState(false);
     const [onMobile, setOnMobile] = useState(() => {
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      });
+    });
       
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -149,10 +150,12 @@ const SwipeFits = ({ isAuth }) => {
 
         // Call updateCombos to update comboPrefs
         updateCombos(newCombos);
+        setIsTransitioning(true);
         setTimeout(() => {
             pickOutfit(sorted);
             setSlideDirection(null);
-        }, 300)
+            setIsTransitioning(false);
+        }, 500); // Slightly longer for smoother effect
     };
 
     useEffect(() => {
@@ -232,7 +235,7 @@ const SwipeFits = ({ isAuth }) => {
             document.removeEventListener('touchstart', handleTouchStart);
             document.removeEventListener('touchend', handleTouchEnd);
         };
-    }, [scoreTags]); // Ensure scoreTags is included as a dependency if it's defined in this scope
+    }, [scoreTags]);
 
     const updateItemList = (newItemList) => {
         setDisplayedItems(newItemList);
@@ -404,18 +407,57 @@ const SwipeFits = ({ isAuth }) => {
         <div>
             <GetUserItems setItemList={updateItemList} id={auth.currentUser.uid}/>
             <GetUserPrefs setPrefs={updateComboList} id={auth.currentUser.uid}/>
+            <div className="swipeFitIndicators" style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: onMobile ? '100vw' : '60vw',
+                margin: 'auto',
+                marginBottom: '10px',
+                position: 'relative',
+                height: '60px',
+                fontFamily: 'Verdana, Geneva, Tahoma, sans-serif',
+                fontSize: onMobile ? '18px' : '22px',
+                zIndex: 2
+            }}>
+                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                    <span style={{fontSize: '32px', color: 'red'}}>←</span>
+                    <span style={{marginTop: '-8px'}}>Bad</span>
+                </div>
+                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                    <span style={{fontSize: '32px', color: 'orange'}}>↓</span>
+                    <span style={{marginTop: '-8px'}}>OK</span>
+                </div>
+                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                    <span style={{fontSize: '32px', color: 'green'}}>↑</span>
+                    <span style={{marginTop: '-8px'}}>Good</span>
+                </div>
+                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                    <span style={{fontSize: '32px', color: 'blue'}}>→</span>
+                    <span style={{marginTop: '-8px'}}>Great</span>
+                </div>
+            </div>
             <div className='swipeFitContainer' style={{
-                    transition: 'transform 0.3s ease-in-out',
-                    transform: slideDirection ? 
-                        (slideDirection === 'left' ? 'translateX(-100vw)' :
-                        slideDirection === 'right' ? 'translateX(100vw)' :
-                        slideDirection === 'up' ? 'translateY(-100vh)' :
-                        'translateY(100vh)'
-                        ) : 'translate(0, 0)'
-                }}>
+                transition: isTransitioning ? 'transform 0.5s cubic-bezier(0.77,0,0.175,1)' : 'transform 0.3s ease-in-out',
+                transform: slideDirection ? 
+                    (slideDirection === 'left' ? 'translateX(-100vw)' :
+                    slideDirection === 'right' ? 'translateX(100vw)' :
+                    slideDirection === 'up' ? 'translateY(-100vh)' :
+                    'translateY(100vh)'
+                    ) : 'translate(0, 0)',
+                boxShadow: isTransitioning ? '0 8px 32px rgba(0,0,0,0.18)' : '',
+                background: isTransitioning ? 'var(--color4)' : '',
+                borderRadius: '16px',
+                width: onMobile ? '90vw' : '40vw',
+                margin: 'auto',
+                minHeight: onMobile ? '350px' : '400px',
+                maxWidth: '600px',
+                position: 'relative',
+                zIndex: 1
+            }}>
                 {curFit &&
                     <>
-                        <DisplayFit fit={curFit} removeFit={handleRemoveFit} width={"150px"} curUser={true}/>
+                        <DisplayFit fit={curFit} removeFit={handleRemoveFit} width={onMobile ? "120px" : "150px"} curUser={true}/>
                     </>
                 }
             </div>
