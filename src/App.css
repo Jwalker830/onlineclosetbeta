@@ -1,3 +1,65 @@
+:root {
+  --color0: #222222;
+  --color1: #9A9A9A;
+  --color2: #B4B4B4;
+  --color3: #C2C2C2;
+  --color4: #DDDDDD;
+  --color5: #E4E4E4;
+}
+
+body.dark-mode {
+  --color0: #f5f5f5;
+  --color1: #444444;
+  --color2: #666666;
+  --color3: #222222;
+  --color4: #181818;
+  --color5: #000000;
+  background: #000 !important;
+  color: #f5f5f5 !important;
+}
+/* Toggle Switch for Settings Modal */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .3s;
+  border-radius: 20px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: #2196F3;
+}
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+.slider.round {
+  border-radius: 20px;
+}
 /* Modal styles for FavFits clear confirmation */
 .modal-overlay {
   position: fixed;

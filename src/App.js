@@ -18,9 +18,21 @@ import ViewLog from './pages/ViewLog.js';
 import GeneratePackingList from './pages/GeneratePackingList';
 import MatchFit from './pages/MatchFit.js';
 
+
 function App() {
     const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth"));
     const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
+    const [showSettings, setShowSettings] = useState(false);
+    const [darkMode, setDarkMode] = useState(false);
+
+    // Toggle dark mode class on body
+    useEffect(() => {
+        if (darkMode) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+    }, [darkMode]);
 
     const signUserOut = () => {
         signOut(auth).then(() => {
@@ -29,6 +41,7 @@ function App() {
             window.location.pathname = "/onlineclosetbeta/login";
         });
     };
+
 
     useEffect(() => {
         const handleResize = () => {
@@ -64,25 +77,50 @@ function App() {
                 </div>
             )}
 
-            <nav>
-                <div className="nav-top">
-                    {isAuth && <Link to="/feed">Feed</Link>}
-                    {isAuth && <Link to="/" onClick={() => { localStorage.removeItem("closetID") }}>Closet</Link>}
-                    {isAuth && <Link to="/pack">Pack</Link>}
-                    {isAuth && <Link to="/fits">Outfits</Link>}
-                    {isAuth && <Link to="/tagitems">Tag Items</Link>}
-                    {isAuth && <Link to="/profile">Profile</Link>}
-                    <Link to="/search">Search</Link>
+            {/* Settings Modal */}
+            {showSettings && (
+                <div className="modal-overlay">
+                    <div className="modal-content" style={{ minWidth: 260, maxWidth: 320 }}>
+                        <h3 style={{ marginBottom: 18, fontSize: '1.2rem' }}>Settings</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                            <span style={{ fontSize: '1rem' }}>Dark Mode</span>
+                            <label className="switch">
+                                <input type="checkbox" checked={darkMode} onChange={() => setDarkMode(v => !v)} />
+                                <span className="slider round"></span>
+                            </label>
+                        </div>
+                        <button className="modal-btn cancel" style={{ marginTop: 10 }} onClick={() => setShowSettings(false)}>Close</button>
+                    </div>
                 </div>
-                <div className="nav-bottom">
-                    {!isAuth ? <Link to="/login">Login</Link> :
-                        <>
-                            <button className="signOutBtn" onClick={signUserOut}>Log Out</button>
-                        </>
-                    }
-                    <Link to="/about">About</Link>
-                </div>
-            </nav>
+            )}
+
+            {/* Nav is hidden in portrait mode, so also hide settings button */}
+            {!isPortrait && (
+                <nav>
+                    <div className="nav-top">
+                        {isAuth && <Link to="/feed">Feed</Link>}
+                        {isAuth && <Link to="/" onClick={() => { localStorage.removeItem("closetID") }}>Closet</Link>}
+                        {isAuth && <Link to="/pack">Pack</Link>}
+                        {isAuth && <Link to="/fits">Outfits</Link>}
+                        {isAuth && <Link to="/tagitems">Tag Items</Link>}
+                        {isAuth && <Link to="/profile">Profile</Link>}
+                        <Link to="/search">Search</Link>
+                    </div>
+                    <div className="nav-bottom">
+                        {isAuth && (
+                            <button className="settingsBtn" title="Settings" onClick={() => setShowSettings(true)} style={{ background: 'none', border: 'none', padding: 0, marginBottom: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, lineHeight: 1 }}>
+                                <span role="img" aria-label="Settings">⚙</span>
+                            </button>
+                        )}
+                        {!isAuth ? <Link to="/login">Login</Link> :
+                            <>
+                                <button className="signOutBtn" onClick={signUserOut}>Log Out</button>
+                            </>
+                        }
+                        <Link to="/about">About</Link>
+                    </div>
+                </nav>
+            )}
             <div className="main-content">
                 <Routes>
                     <Route path="/tagitems" element={<TagItems isAuth={isAuth} />} />
