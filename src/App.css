@@ -1,3 +1,75 @@
+/* Modal styles for FavFits clear confirmation */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: var(--color5, #fff);
+  padding: 2rem 2.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  text-align: center;
+  min-width: 300px;
+}
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.modal-btn {
+  font-size: 15px;
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+.modal-btn.confirm {
+  background: var(--color3, #e74c3c);
+  color: var(--color0, #fff);
+}
+.modal-btn.confirm:hover {
+  background: var(--color1, #c0392b);
+  color: var(--color5, #fff);
+}
+.modal-btn.cancel {
+  background: var(--color4, #eee);
+  color: var(--color2, #333);
+}
+.modal-btn.cancel:hover {
+  background: var(--color2, #ccc);
+  color: var(--color5, #222);
+}
+/* Clear All Favorites button for FavFits */
+.clearFavFitsButton {
+  font-size: 15px;
+  padding: 8px 18px;
+  margin-bottom: 18px;
+  border-radius: 6px;
+  background: var(--color3);
+  color: var(--color0);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  font-weight: 500;
+}
+.clearFavFitsButton:hover {
+  background-color: var(--color1);
+  color: var(--color5);
+}
 /* SwipeFits direction indicators and transitions */
 .swipeFitIndicators {
   user-select: none;

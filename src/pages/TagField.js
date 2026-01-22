@@ -67,10 +67,23 @@ const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile,
         }
       };
 
+
+    // Converts the visible tag input to an array, excluding color tags
     function stringToArray(inputString) {
         inputString = inputString.trim();
-        const itemsArray = inputString.split(',').map(item => item.trim());
+        const itemsArray = inputString.split(',').map(item => item.trim()).filter(Boolean);
         return itemsArray;
+    }
+
+    // Returns the full tag array including hidden color tags
+    function getFullTagsArray() {
+        const visibleTags = stringToArray(itemTags);
+        // Use a unique prefix to avoid collision with user tags
+        const colorTags = [
+            `__color_primary:${itemPrimary}`,
+            `__color_secondary:${itemSecondary}`
+        ];
+        return [...visibleTags, ...colorTags];
     }
 
     const changeInfo = async () => {
@@ -78,7 +91,7 @@ const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile,
             ...itemDisplay,
             title: itemTitle,
             desc: itemDesc,
-            tags: stringToArray(itemTags),
+            tags: getFullTagsArray(),
             type: itemType,
             imgURL: itemImage,
             primaryColor: itemPrimary,
@@ -315,27 +328,103 @@ const TagField = ({ item, setCurItem, index, itemArray, setCurIndex, isOnMobile,
                             <label><input type="radio" name="itemType" value="Shoes" checked={itemType === "Shoes"} /> Shoes</label><br/>
                             <label><input type="radio" name="itemType" value="Accessory" checked={itemType === "Accessory"} /> Accessory</label><br/>
                         </div>
-                            <div className='colorShow'>
-                                <div className='primaryShow'>
+                            <div className='colorShow' style={{ display: 'flex', flexDirection: 'row', gap: '2rem', alignItems: 'center' }}>
+                                <div className='primaryShow' style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                     <p>Primary Color</p>
                                     <div className='primaryPicker'>
-                                    <input
-                                        type="color"
-                                        value={itemPrimary} // Assuming you have a primaryColor state
-                                        onChange={(e) => setItemPrimary(e.target.value)} // Update state on color change
-                                    />
+                                        <input
+                                            type="color"
+                                            value={itemPrimary}
+                                            onChange={(e) => setItemPrimary(e.target.value)}
+                                        />
                                     </div>
                                 </div>
-                                <div className='secondaryShow'>
+                                <div className='secondaryShow' style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                     <p>Secondary Color</p>
                                     <div className='secondaryPicker'>
-                                    <input
-                                        type="color"
-                                        value={itemSecondary} // Assuming you have a secondaryColor state
-                                        onChange={(e) => setItemSecondary(e.target.value)} // Update state on color change
-                                    />
+                                        <input
+                                            type="color"
+                                            value={itemSecondary}
+                                            onChange={(e) => setItemSecondary(e.target.value)}
+                                        />
                                     </div>
                                 </div>
+                                <button type="button" style={{ height: '2.5rem', alignSelf: 'flex-end' }} onClick={async () => {
+                                    // K-means clustering for color extraction
+                                    if (!itemImage) return;
+                                    const img = new window.Image();
+                                    img.crossOrigin = 'Anonymous';
+                                    img.src = itemImage;
+                                    img.onload = () => {
+                                        const canvas = document.createElement('canvas');
+                                        const ctx = canvas.getContext('2d');
+                                        canvas.width = img.width;
+                                        canvas.height = img.height;
+                                        ctx.drawImage(img, 0, 0);
+                                        const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                        // Collect all non-transparent pixels
+                                        let pixels = [];
+                                        for (let i = 0; i < data.length; i += 4) {
+                                            if (data[i + 3] > 0) {
+                                                pixels.push([data[i], data[i + 1], data[i + 2]]);
+                                            }
+                                        }
+                                        // K-means clustering implementation
+                                        function kMeans(data, k = 2, maxIter = 10) {
+                                            // Randomly initialize centroids
+                                            let centroids = [];
+                                            for (let i = 0; i < k; i++) {
+                                                centroids.push(data[Math.floor(Math.random() * data.length)]);
+                                            }
+                                            let assignments = new Array(data.length);
+                                            for (let iter = 0; iter < maxIter; iter++) {
+                                                // Assign each pixel to the nearest centroid
+                                                for (let i = 0; i < data.length; i++) {
+                                                    let minDist = Infinity, idx = 0;
+                                                    for (let j = 0; j < k; j++) {
+                                                        let dist = Math.sqrt(
+                                                            Math.pow(data[i][0] - centroids[j][0], 2) +
+                                                            Math.pow(data[i][1] - centroids[j][1], 2) +
+                                                            Math.pow(data[i][2] - centroids[j][2], 2)
+                                                        );
+                                                        if (dist < minDist) {
+                                                            minDist = dist;
+                                                            idx = j;
+                                                        }
+                                                    }
+                                                    assignments[i] = idx;
+                                                }
+                                                // Update centroids
+                                                let sums = Array(k).fill().map(() => [0, 0, 0]);
+                                                let counts = Array(k).fill(0);
+                                                for (let i = 0; i < data.length; i++) {
+                                                    let cluster = assignments[i];
+                                                    sums[cluster][0] += data[i][0];
+                                                    sums[cluster][1] += data[i][1];
+                                                    sums[cluster][2] += data[i][2];
+                                                    counts[cluster]++;
+                                                }
+                                                for (let j = 0; j < k; j++) {
+                                                    if (counts[j] > 0) {
+                                                        centroids[j] = [
+                                                            Math.round(sums[j][0] / counts[j]),
+                                                            Math.round(sums[j][1] / counts[j]),
+                                                            Math.round(sums[j][2] / counts[j])
+                                                        ];
+                                                    }
+                                                }
+                                            }
+                                            return centroids;
+                                        }
+                                        if (pixels.length > 0) {
+                                            const [primary, secondary] = kMeans(pixels, 2);
+                                            setItemPrimary(convertColor(`rgb(${primary[0]}, ${primary[1]}, ${primary[2]})`));
+                                            setItemSecondary(convertColor(`rgb(${secondary[0]}, ${secondary[1]}, ${secondary[2]})`));
+                                        }
+                                    };
+                                }}>
+                                    Auto Color
+                                </button>
                             </div>
                     </div>
                     <button type="submit" onClick={changeInfo}>Save</button>
