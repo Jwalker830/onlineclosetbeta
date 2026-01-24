@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { db, auth } from "./firebase-config";
+import { query, collection, where, getDocs } from "firebase/firestore";
 import './App.css';
 import { HashRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { auth } from "./firebase-config.js";
 import TagItems from "./pages/TagItems.js";
 import Login from "./pages/Login.js";
 import SwipeFits from "./pages/SwipeFits.js";
@@ -24,6 +25,40 @@ function App() {
     const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
     const [showSettings, setShowSettings] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
+    const [userCombos, setUserCombos] = useState("");
+    // Fetch combos string for export
+    useEffect(() => {
+        const fetchCombos = async () => {
+            if (!auth.currentUser) return;
+            try {
+                const q = query(collection(db, "users"), where("id", "==", auth.currentUser.uid));
+                const querySnapshot = await getDocs(q);
+                let combos = "";
+                await Promise.all(querySnapshot.docs.map(async (userDoc) => {
+                    const data = userDoc.data();
+                    combos = data.combos || "";
+                }));
+                setUserCombos(combos);
+            } catch (error) {
+                setUserCombos("");
+            }
+        };
+        if (showSettings && auth.currentUser) fetchCombos();
+    }, [showSettings]);
+
+    // Export combos to .txt file
+    const handleExportCombos = () => {
+        if (!userCombos) return;
+        const blob = new Blob([userCombos], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'combos.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
 
     // Toggle dark mode class on body
     useEffect(() => {
@@ -89,7 +124,10 @@ function App() {
                                 <span className="slider round"></span>
                             </label>
                         </div>
-                        <button className="modal-btn cancel" style={{ marginTop: 10 }} onClick={() => setShowSettings(false)}>Close</button>
+                        <button className="modal-btn" style={{ marginTop: 10, marginBottom: 8, background: '#444', color: '#fff' }} onClick={handleExportCombos} disabled={!userCombos}>
+                            Export Combo Sheet
+                        </button>
+                        <button className="modal-btn cancel" style={{ marginTop: 0 }} onClick={() => setShowSettings(false)}>Close</button>
                     </div>
                 </div>
             )}
@@ -107,11 +145,10 @@ function App() {
                         <Link to="/search">Search</Link>
                     </div>
                     <div className="nav-bottom">
-                        {isAuth && (
-                            <button className="settingsBtn" title="Settings" onClick={() => setShowSettings(true)} style={{ background: 'none', border: 'none', padding: 0, marginBottom: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, lineHeight: 1 }}>
-                                <span role="img" aria-label="Settings">⚙</span>
-                            </button>
-                        )}
+                        <button className="settingsBtn" title="Settings" onClick={() => setShowSettings(true)} style={{ background: 'none', border: 'none', padding: 0, marginBottom: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, lineHeight: 1 }}>
+                            <span role="img" aria-label="Settings">⚙</span>
+                        </button>
+                        
                         {!isAuth ? <Link to="/login">Login</Link> :
                             <>
                                 <button className="signOutBtn" onClick={signUserOut}>Log Out</button>

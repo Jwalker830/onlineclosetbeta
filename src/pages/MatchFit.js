@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { db, auth } from "../firebase-config";
 import { query, collection, where, getDocs, getDoc, doc } from "firebase/firestore";
-import winkNLP from 'wink-nlp';
-import model from 'wink-eng-lite-web-model';
+import { getNLP } from '../nlpSingleton';
 import DisplayFit from './DisplayFit';
 import GetUserItems from './GetUserItems';
 
-const nlp = winkNLP(model);
 
 const MatchFit = () => {
     const { fitcode } = useParams();
@@ -116,7 +114,8 @@ const MatchFit = () => {
         return outfit;
     };
 
-    const findBestMatch = (tag, tagList) => {
+    const findBestMatch = async (tag, tagList) => {
+        const nlp = await getNLP();
         let bestMatch = { target: null, rating: 0 };
         tagList.forEach(candidate => {
             const doc1 = nlp.readDoc(tag);
@@ -129,16 +128,16 @@ const MatchFit = () => {
         return { bestMatch };
     };
 
-    const findSimilarTags = (fitTags) => {
+    const findSimilarTags = async (fitTags) => {
         console.log("Relating tags from fitTags:", fitTags);
         const similarTags = new Set();
-        fitTags.forEach(tag => {
+        for (const tag of fitTags) {
             if (itemTags.includes(tag)) {
                 console.log(`Direct match for tag "${tag}"`);
                 similarTags.add(tag);
             } else {
                 // Find best match
-                const result = findBestMatch(tag, itemTags);
+                const result = await findBestMatch(tag, itemTags);
                 console.log(`Best match for "${tag}": "${result.bestMatch.target}" with rating ${result.bestMatch.rating}`);
                 if (result.bestMatch.rating > 0.6) { // Threshold for similarity
                     similarTags.add(result.bestMatch.target);
@@ -146,7 +145,7 @@ const MatchFit = () => {
                     console.log(`No good match for "${tag}", skipping`);
                 }
             }
-        });
+        }
         return Array.from(similarTags);
     };
 
@@ -211,6 +210,10 @@ const MatchFit = () => {
         if (itemTags.length > 0 && userItems.length > 0 && fitcode) {
             matchFits();
         }
+        // Cleanup NLP instance when unmounting
+        return () => {
+            // Optionally: import { cleanupNLP } and call it here if you want to free memory
+        };
     }, [itemTags, userItems, fitcode]);
 
     const matchFits = async () => {
@@ -228,7 +231,7 @@ const MatchFit = () => {
             const uniqueFitTags = [...new Set(fitTags)];
             console.log("Tags from the outfit to be matched with:", uniqueFitTags);
 
-            const similarTags = findSimilarTags(uniqueFitTags);
+            const similarTags = await findSimilarTags(uniqueFitTags);
             console.log("Similar tags found:", similarTags);
 
             // Generate 5 different fits

@@ -1,3 +1,4 @@
+import { getNLP } from '../nlpSingleton';
 import React, { useState, useEffect } from 'react';
 import { setDoc, doc, query, collection, where, getDocs, updateDoc, arrayUnion } from "firebase/firestore";
 import { db, auth, provider} from "../firebase-config";
@@ -214,16 +215,55 @@ function GenerateFit({ isAuth, userItems, passFit, setNewFit, baseItems, clearLo
     
         let curItems = [];
     
+        // --- NLP tag matching for genPrompt (like MatchFit) ---
         if(genPrompt !== null){
-            displayedItems.forEach((item) => {
-                if(item.tags.some(tag => genPrompt.includes(tag))){
-                    curItems.push(item);
-                    item.tags.forEach((tag) => {
-                        curTags.add(tag);
-                    });
+            // Find similar tags using wink-nlp singleton
+            const findBestMatch = async (tag, tagList) => {
+                const nlp = await getNLP();
+                let bestMatch = { target: null, rating: 0 };
+                tagList.forEach(candidate => {
+                    const doc1 = nlp.readDoc(tag);
+                    const doc2 = nlp.readDoc(candidate);
+                    const similarity = doc1.out(nlp.its.similarity, doc2);
+                    if (similarity > bestMatch.rating) {
+                        bestMatch = { target: candidate, rating: similarity };
+                    }
+                });
+                return bestMatch;
+            };
+
+            // Collect all unique tags from displayedItems
+            const allTags = Array.from(new Set(displayedItems.flatMap(item => item.tags || [])));
+
+            // For each prompt tag, find similar tags in allTags
+            let similarTags = new Set();
+            const findAllSimilarTags = async () => {
+                for (const tag of genPrompt) {
+                    if (allTags.includes(tag)) {
+                        similarTags.add(tag);
+                    } else {
+                        const best = await findBestMatch(tag, allTags);
+                        if (best.rating > 0.6 && best.target) {
+                            similarTags.add(best.target);
+                        }
+                    }
                 }
-            });
-            console.log(sortPrefItems(curItems));
+            };
+            // Run the async tag finding and then continue
+            // (This code block is inside a non-async function, so we use an IIFE)
+            (async () => {
+                await findAllSimilarTags();
+                // Now use similarTags for matching items
+                displayedItems.forEach((item) => {
+                    if(item.tags && item.tags.some(tag => similarTags.has(tag))){
+                        curItems.push(item);
+                        item.tags.forEach((tag) => {
+                            curTags.add(tag);
+                        });
+                    }
+                });
+                console.log(sortPrefItems(curItems));
+            })();
         }
     
         if(genPrompt === null){
